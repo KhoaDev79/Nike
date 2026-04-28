@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useCartStore from '../store/useCartStore';
 import useAuthStore from '../store/useAuthStore';
+import CartDrawer from './CartDrawer';
 
 export default function Header() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const { items } = useCartStore();
   const { user, logout } = useAuthStore();
@@ -78,7 +80,7 @@ export default function Header() {
         <div className='flex items-center gap-3'>
           {/* Cart button */}
           <button
-            onClick={() => navigate('/cart')}
+            onClick={() => setIsCartOpen(true)}
             className='relative p-2 hover:bg-zinc-800 rounded-full transition'
           >
             <svg
@@ -186,6 +188,8 @@ export default function Header() {
           </Link>
         </div>
       )}
+
+      <CartDrawer open={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </header>
   );
 }

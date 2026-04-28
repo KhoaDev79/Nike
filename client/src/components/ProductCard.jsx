@@ -52,7 +52,7 @@ export default function ProductCard({ product }) {
         />
 
         {/* Badges */}
-        <div className='absolute top-3 left-3 flex flex-col gap-1.5'>
+        <div className='absolute top-3 left-3 flex flex-row flex-wrap gap-1.5'>
           <span
             className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${tierColor}`}
           >
