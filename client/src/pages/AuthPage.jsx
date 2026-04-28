@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import toast from 'react-hot-toast';
 import googleIcon from '../assets/google-icon-logo-svgrepo-com.svg';
-import { useUser, useClerk } from '@clerk/react';
+import { useUser, useClerk, useSignIn } from '@clerk/react';
 
 export default function AuthPage() {
   const navigate = useNavigate();
   const { login, register, googleLogin, user, loading, error, clearError } = useAuthStore();
   const { user: clerkUser, isSignedIn } = useUser();
+  const { signIn, isLoaded: signInLoaded } = useSignIn();
   const clerk = useClerk();
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({
@@ -54,26 +55,30 @@ export default function AuthPage() {
   }, [isSignedIn, clerkUser]);
 
   const handleGoogleSignIn = async () => {
+    // Kiểm tra xem Clerk đã sẵn sàng chưa
+    if (!clerk || !clerk.client) {
+      console.warn('Clerk or Clerk Client is not yet loaded');
+      toast.error('Hệ thống xác thực đang khởi tạo. Vui lòng đợi trong giây lát.');
+      return;
+    }
+    
     try {
       // Đăng xuất phiên Clerk cũ để user có thể chọn tài khoản Google khác
       if (isSignedIn) {
+        console.log('Signing out from existing session...');
         await clerk.signOut();
       }
+      
       // Đánh dấu đang chờ Google
       sessionStorage.setItem('nike_google_pending', 'true');
+      console.log('Starting Google OAuth redirect...');
 
-      // Tạo phiên sign-in mới với Google OAuth
-      const si = await clerk.client.signIn.create({
+      // Sử dụng phương thức authenticateWithRedirect từ client.signIn
+      await clerk.client.signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
-        redirectUrl: window.location.origin + '/sso-callback',
-        actionCompleteRedirectUrl: window.location.origin + '/auth',
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: '/auth',
       });
-
-      // Lấy URL redirect từ Google và chuyển hướng
-      const redirectUrl = si.firstFactorVerification.externalVerificationRedirectURL;
-      if (redirectUrl) {
-        window.location.href = redirectUrl;
-      }
     } catch (err) {
       sessionStorage.removeItem('nike_google_pending');
       console.error('Google sign-in error:', err);
