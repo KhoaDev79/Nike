@@ -9,16 +9,15 @@ import {
   getRelatedProductsAPI,
   addReviewAPI,
 } from '../services/productService';
-import { toggleWishlistAPI } from '../services/authService';
 import toast from 'react-hot-toast';
 
 export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCartStore();
-  const { user } = useAuthStore();
-
+  const { user, toggleWishlist } = useAuthStore();
   const [product, setProduct] = useState(null);
+  const isWishlisted = user?.wishlist?.some(id => (typeof id === 'string' ? id : id._id) === product?._id);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [imgIdx, setImgIdx] = useState(0);
@@ -56,12 +55,18 @@ export default function ProductDetail() {
 
   const handleWishlist = async () => {
     if (!user) return navigate('/auth');
-    try {
-      await toggleWishlistAPI(product._id);
-      toast.success('Đã cập nhật danh sách yêu thích!');
-    } catch {
+    const res = await toggleWishlist(product._id);
+    if (res.success) {
+      toast.success(res.wishlisted ? 'Đã thêm vào yêu thích!' : 'Đã xoá khỏi yêu thích!');
+    } else {
       toast.error('Có lỗi xảy ra!');
     }
+  };
+
+  const handleBuyNow = () => {
+    if (!size) return toast.error('Vui lòng chọn size!');
+    addItem({ ...product, selectedSize: size }, qty);
+    navigate('/checkout');
   };
 
   const handleReview = async (e) => {
@@ -83,7 +88,7 @@ export default function ProductDetail() {
     }
   };
 
-  if (loading)
+  if (loading || !product)
     return (
       <div className='max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-2 gap-12'>
         <div className='bg-zinc-100 rounded-2xl aspect-square animate-pulse' />
@@ -232,35 +237,74 @@ export default function ProductDetail() {
             </div>
 
             {/* Actions */}
-            <div className='flex gap-3 mb-6'>
-              <button
-                onClick={handleAddToCart}
-                disabled={product.totalStock === 0}
-                className='flex-1 bg-black text-white font-black py-4 rounded-full text-sm uppercase tracking-widest hover:bg-zinc-800 transition disabled:opacity-40 disabled:cursor-not-allowed'
-              >
-                {product.totalStock === 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
-              </button>
-              <button
-                onClick={handleWishlist}
-                className='w-14 h-14 rounded-full border-2 border-zinc-300 flex items-center justify-center hover:border-red-500 hover:text-red-500 transition'
-              >
-                <svg
-                  className='w-5 h-5'
-                  fill='none'
-                  stroke='currentColor'
-                  strokeWidth='2'
-                  viewBox='0 0 24 24'
+            <div className='flex flex-col gap-3 mb-8'>
+              <div className='flex gap-3'>
+                <button
+                  onClick={handleAddToCart}
+                  disabled={product.totalStock === 0}
+                  className='flex-1 bg-black text-white font-black py-4 rounded-2xl text-sm uppercase tracking-widest hover:bg-zinc-800 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_10px_20px_-5px_rgba(0,0,0,0.3)]'
                 >
-                  <path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z' />
-                </svg>
+                  {product.totalStock === 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
+                </button>
+                <button
+                  onClick={handleWishlist}
+                  className={`w-14 h-14 rounded-2xl border-2 flex items-center justify-center transition-all duration-300 ${
+                    isWishlisted 
+                      ? 'bg-red-50 border-red-100 text-red-500' 
+                      : 'border-zinc-200 text-zinc-400 hover:border-black hover:text-black'
+                  }`}
+                >
+                  <svg
+                    className='w-6 h-6'
+                    fill={isWishlisted ? 'currentColor' : 'none'}
+                    stroke='currentColor'
+                    strokeWidth='2'
+                    viewBox='0 0 24 24'
+                  >
+                    <path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z' />
+                  </svg>
+                </button>
+              </div>
+              <button
+                onClick={handleBuyNow}
+                disabled={product.totalStock === 0}
+                className='w-full bg-blue-600 text-white font-black py-4 rounded-2xl text-sm uppercase tracking-widest hover:bg-blue-700 transition disabled:opacity-40 shadow-[0_10px_20px_-5px_rgba(37,99,235,0.3)]'
+              >
+                Mua ngay
               </button>
             </div>
 
-            {/* Shipping info */}
-            <div className='bg-zinc-50 rounded-xl p-4 space-y-2 text-sm text-zinc-600'>
-              <p>🚚 Miễn phí vận chuyển cho đơn từ 1.500.000đ</p>
-              <p>↩️ Đổi trả trong 30 ngày</p>
-              <p>✅ Hàng chính hãng 100%</p>
+            {/* Shipping info Redesign */}
+            <div className='grid grid-cols-1 gap-3'>
+              <div className='flex items-center gap-4 p-4 bg-zinc-50 rounded-2xl border border-zinc-100 group hover:bg-white hover:shadow-xl hover:shadow-zinc-100 transition-all duration-300'>
+                <div className='w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 shrink-0 group-hover:scale-110 transition-transform'>
+                  <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' /></svg>
+                </div>
+                <div>
+                  <p className='text-sm font-black text-black'>Miễn phí vận chuyển</p>
+                  <p className='text-[11px] text-zinc-500 font-bold'>Cho đơn hàng từ 1.500.000đ</p>
+                </div>
+              </div>
+
+              <div className='flex items-center gap-4 p-4 bg-zinc-50 rounded-2xl border border-zinc-100 group hover:bg-white hover:shadow-xl hover:shadow-zinc-100 transition-all duration-300'>
+                <div className='w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-green-600 shrink-0 group-hover:scale-110 transition-transform'>
+                  <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' /></svg>
+                </div>
+                <div>
+                  <p className='text-sm font-black text-black'>Hàng chính hãng 100%</p>
+                  <p className='text-[11px] text-zinc-500 font-bold'>Cam kết bồi thường x10 nếu phát hiện hàng giả</p>
+                </div>
+              </div>
+
+              <div className='flex items-center gap-4 p-4 bg-zinc-50 rounded-2xl border border-zinc-100 group hover:bg-white hover:shadow-xl hover:shadow-zinc-100 transition-all duration-300'>
+                <div className='w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 shrink-0 group-hover:scale-110 transition-transform'>
+                  <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' /></svg>
+                </div>
+                <div>
+                  <p className='text-sm font-black text-black'>Đổi trả trong 30 ngày</p>
+                  <p className='text-[11px] text-zinc-500 font-bold'>Dễ dàng đổi trả nếu không vừa size</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -518,9 +562,9 @@ export default function ProductDetail() {
             <div className='p-8 pb-6'>
               <button 
                 onClick={() => setShowCartModal(false)}
-                className='absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200 transition text-zinc-500 hover:text-black font-bold'
+                className='absolute top-5 right-5 w-10 h-10 flex items-center justify-center rounded-full text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all duration-300'
               >
-                ✕
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
               
               <h3 className='text-2xl font-black mb-6 text-black flex items-center gap-2'>

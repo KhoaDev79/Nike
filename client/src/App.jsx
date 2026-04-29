@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
 import Header from './components/Header';
@@ -10,6 +10,7 @@ import AuthPage from './pages/AuthPage';
 import SSOCallback from './pages/SSOCallback';
 import CheckoutPage from './pages/CheckoutPage';
 import AboutPage from './pages/AboutPage';
+import WishlistPage from './pages/WishlistPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import OrdersPage from './pages/OrdersPage';
@@ -19,11 +20,13 @@ import AdminProductsPage from './pages/AdminProductsPage';
 import AdminCustomersPage from './pages/AdminCustomersPage';
 import AdminReportsPage from './pages/AdminReportsPage';
 
-export default function App() {
+function Layout() {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
+
   return (
-    <BrowserRouter>
-      <Toaster position='top-right' />
-      <Header />
+    <>
+      {!isAdmin && <Header />}
       <main>
         <Routes>
           <Route path='/' element={<HomePage />} />
@@ -33,6 +36,7 @@ export default function App() {
           <Route path='/auth' element={<AuthPage />} />
           <Route path='/checkout' element={<CheckoutPage />} />
           <Route path='/about' element={<AboutPage />} />
+          <Route path='/wishlist' element={<WishlistPage />} />
           <Route path='/account' element={<ProfilePage />} />
           <Route path='/orders' element={<OrdersPage />} />
           <Route path='/orders/:id' element={<OrderDetailPage />} />
@@ -43,7 +47,16 @@ export default function App() {
           <Route path='/admin/reports' element={<AdminReportsPage />} />
         </Routes>
       </main>
-      <Footer />
+      {!isAdmin && <Footer />}
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Toaster position='top-right' />
+      <Layout />
     </BrowserRouter>
   );
 }

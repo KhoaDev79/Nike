@@ -9,3 +9,10 @@ export const changePasswordAPI = (payload) =>
   api.put('/auth/change-password', payload);
 export const toggleWishlistAPI = (productId) =>
   api.post(`/auth/wishlist/${productId}`);
+
+// Admin
+export const getAllUsersAPI = () => api.get('/auth/admin/users');
+export const updateUserByAdminAPI = (id, payload) =>
+  api.put(`/auth/admin/users/${id}`, payload);
+export const deleteUserByAdminAPI = (id) =>
+  api.delete(`/auth/admin/users/${id}`);

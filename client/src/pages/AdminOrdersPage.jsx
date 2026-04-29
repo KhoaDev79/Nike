@@ -5,6 +5,19 @@ import { getAllOrdersAPI, updateOrderStatusAPI, getAdminStatsAPI } from '../serv
 import toast from 'react-hot-toast';
 import AdminSidebar from '../components/AdminSidebar';
 
+const glass = { background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14 };
+const muted = 'rgba(255,255,255,0.35)';
+const hint = 'rgba(255,255,255,0.2)';
+const secondary = 'rgba(255,255,255,0.65)';
+
+const statusColors = {
+  pending: { label: 'Chờ xác nhận', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.2)', color: '#fbbf24', hover: 'rgba(245,158,11,0.15)' },
+  confirmed: { label: 'Đã xác nhận', bg: 'rgba(124,58,237,0.12)', border: 'rgba(124,58,237,0.2)', color: '#a78bfa', hover: 'rgba(124,58,237,0.15)' },
+  shipping: { label: 'Đang giao', bg: 'rgba(236,72,153,0.12)', border: 'rgba(236,72,153,0.2)', color: '#f472b6', hover: 'rgba(236,72,153,0.15)' },
+  delivered: { label: 'Đã giao', bg: 'rgba(13,148,136,0.12)', border: 'rgba(13,148,136,0.2)', color: '#2dd4bf', hover: 'rgba(13,148,136,0.15)' },
+  cancelled: { label: 'Đã hủy', bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.2)', color: '#f87171', hover: 'rgba(239,68,68,0.15)' },
+};
+
 export default function AdminOrdersPage() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
@@ -15,260 +28,163 @@ export default function AdminOrdersPage() {
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    if (!user || user.role !== 'admin') {
-      navigate('/');
-      return;
-    }
-    fetchOrders();
-    fetchStats();
+    if (!user || user.role !== 'admin') { navigate('/'); return; }
+    fetchOrders(); fetchStats();
   }, [user, navigate]);
 
-  const fetchStats = async () => {
-    try {
-      const { data } = await getAdminStatsAPI();
-      setStats(data.data);
-    } catch (err) {}
-  };
-
+  const fetchStats = async () => { try { const { data } = await getAdminStatsAPI(); setStats(data.data); } catch {} };
   const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const { data } = await getAllOrdersAPI();
-      setOrders(data.data);
-    } catch (err) {
-      toast.error('Không thể tải danh sách đơn hàng');
-    } finally {
-      setLoading(false);
-    }
+    try { setLoading(true); const { data } = await getAllOrdersAPI(); setOrders(data.data); }
+    catch { toast.error('Không thể tải đơn hàng'); }
+    finally { setLoading(false); }
   };
-
   const handleUpdateStatus = async (id, status) => {
     try {
       await updateOrderStatusAPI(id, { orderStatus: status });
-      toast.success('Cập nhật trạng thái thành công');
+      toast.success('Cập nhật thành công');
       fetchOrders();
-      if (selectedOrder?._id === id) {
-         setSelectedOrder(prev => ({ ...prev, orderStatus: status }));
-      }
-    } catch (err) {
-      toast.error('Cập nhật thất bại');
-    }
+      if (selectedOrder?._id === id) setSelectedOrder(prev => ({ ...prev, orderStatus: status }));
+    } catch { toast.error('Cập nhật thất bại'); }
   };
 
-  const statusMap = {
-    pending: { label: 'Chờ xác nhận', color: 'bg-yellow-100 text-yellow-600' },
-    confirmed: { label: 'Đã xác nhận', color: 'bg-zinc-100 text-zinc-600' },
-    shipping: { label: 'Đang giao', color: 'bg-blue-100 text-blue-600' },
-    delivered: { label: 'Đã giao', color: 'bg-green-100 text-green-600' },
-    cancelled: { label: 'Đã hủy', color: 'bg-red-100 text-red-600' }
-  };
-
-  const filteredOrders = orders.filter(o => 
-    o._id.toLowerCase().includes(filter.toLowerCase()) || 
-    o.shippingInfo.fullName.toLowerCase().includes(filter.toLowerCase())
-  );
+  const filtered = orders.filter(o => o._id.toLowerCase().includes(filter.toLowerCase()) || o.shippingInfo.fullName.toLowerCase().includes(filter.toLowerCase()));
 
   return (
-    <div className='min-h-screen bg-[#F0F2F5] flex'>
+    <div className='min-h-screen relative overflow-hidden' style={{ background: '#080b14', fontFamily: "'Inter',system-ui" }}>
+      <div className='fixed top-[-200px] left-[-200px] w-[600px] h-[600px] rounded-full pointer-events-none' style={{ background: 'rgba(124,58,237,0.12)', filter: 'blur(80px)' }} />
+      <div className='fixed bottom-[-200px] right-[-150px] w-[500px] h-[500px] rounded-full pointer-events-none' style={{ background: 'rgba(13,148,136,0.1)', filter: 'blur(80px)' }} />
       <AdminSidebar stats={stats} />
-
-      <main className='flex-1 p-8'>
-        <div className='flex items-center justify-between mb-10'>
-           <div>
-              <h1 className='text-3xl font-black uppercase tracking-tighter'>Quản lý đơn hàng</h1>
-              <p className='text-zinc-500'>Kiểm soát và xử lý các đơn hàng của khách hàng.</p>
-           </div>
-           <div className='flex items-center gap-4'>
-              <input 
-                type="text" 
-                placeholder="Tìm mã đơn, tên..." 
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className='bg-white border border-zinc-200 px-5 py-2.5 rounded-full text-sm outline-none focus:ring-2 focus:ring-black transition'
-              />
-              <button onClick={fetchOrders} className='bg-black text-white p-2.5 rounded-full hover:bg-zinc-800 transition'>
-                <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'/></svg>
-              </button>
-           </div>
+      <main className='ml-[200px] p-6 lg:p-8 xl:p-10 relative z-10'>
+        <div className='flex items-center justify-between mb-6'>
+          <div>
+            <h1 className='text-[18px] font-bold text-white' style={{ letterSpacing: '-0.03em' }}>Quản lý đơn hàng</h1>
+            <p className='text-[12px] mt-0.5' style={{ color: muted }}>Kiểm soát và xử lý các đơn hàng.</p>
+          </div>
+          <div className='flex items-center gap-3'>
+            <div className='relative'>
+              <input type='text' placeholder='Tìm mã đơn, tên...' value={filter} onChange={e => setFilter(e.target.value)}
+                className='text-[12px] text-white placeholder-white/30 outline-none pl-9 pr-4 py-2.5 rounded-lg w-64'
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }} />
+              <svg className='w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2' fill='none' stroke='rgba(255,255,255,0.3)' strokeWidth='1.5' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/></svg>
+            </div>
+            <button onClick={fetchOrders} className='w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer' style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <svg className='w-4 h-4' fill='none' stroke='rgba(255,255,255,0.5)' strokeWidth='1.5' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'/></svg>
+            </button>
+          </div>
         </div>
 
-        {/* Orders Table */}
-        <div className='bg-white rounded-3xl shadow-sm border border-zinc-100 overflow-hidden'>
-           <table className='w-full text-left text-sm'>
-              <thead>
-                <tr className='bg-zinc-50 text-zinc-400 uppercase text-[10px] tracking-widest border-b border-zinc-100'>
-                  <th className='px-8 py-4 font-black'>Mã đơn</th>
-                  <th className='px-8 py-4 font-black'>Khách hàng</th>
-                  <th className='px-8 py-4 font-black'>Ngày đặt</th>
-                  <th className='px-8 py-4 font-black'>Tổng tiền</th>
-                  <th className='px-8 py-4 font-black'>Trạng thái</th>
-                  <th className='px-8 py-4 font-black text-right'>Hành động</th>
-                </tr>
-              </thead>
-              <tbody className='divide-y divide-zinc-50'>
-                {loading ? (
-                  <tr><td colSpan={6} className='py-20 text-center text-zinc-400 font-bold uppercase tracking-widest'>Đang tải dữ liệu...</td></tr>
-                ) : filteredOrders.length === 0 ? (
-                  <tr><td colSpan={6} className='py-20 text-center text-zinc-400 font-bold uppercase tracking-widest'>Không có đơn hàng nào</td></tr>
-                ) : (
-                  filteredOrders.map(order => (
-                    <tr key={order._id} className='hover:bg-zinc-50 transition group'>
-                      <td className='px-8 py-5 font-bold text-blue-600'>#{order._id.slice(-6).toUpperCase()}</td>
-                      <td className='px-8 py-5'>
-                         <p className='font-black text-zinc-800'>{order.shippingInfo.fullName}</p>
-                         <p className='text-[10px] text-zinc-400'>{order.shippingInfo.phone}</p>
-                      </td>
-                      <td className='px-8 py-5 text-zinc-500'>{new Date(order.createdAt).toLocaleDateString('vi-VN')}</td>
-                      <td className='px-8 py-5 font-black'>{order.totalPrice.toLocaleString('vi-VN')}đ</td>
-                      <td className='px-8 py-5'>
-                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${statusMap[order.orderStatus].color}`}>
-                           {statusMap[order.orderStatus].label}
-                         </span>
-                      </td>
-                      <td className='px-8 py-5 text-right'>
-                         <button 
-                           onClick={() => setSelectedOrder(order)}
-                           className='text-zinc-400 hover:text-black transition p-2'
-                         >
-                            <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M15 12a3 3 0 11-6 0 3 3 0 016 0z'/><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'/></svg>
-                         </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-           </table>
+        <div style={{ ...glass, padding: 0, overflow: 'hidden' }}>
+          <table className='w-full'>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                {['MÃ ĐƠN','KHÁCH HÀNG','NGÀY ĐẶT','TỔNG TIỀN','TRẠNG THÁI',''].map(h => (
+                  <th key={h} className={`px-4 py-3 text-left text-[9px] font-medium uppercase tracking-[0.08em] ${h === 'TỔNG TIỀN' ? 'text-right' : ''}`} style={{ color: hint }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={6} className='py-20 text-center text-[11px] font-medium' style={{ color: muted }}>Đang tải...</td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={6} className='py-20 text-center text-[11px] font-medium' style={{ color: muted }}>Không có đơn hàng</td></tr>
+              ) : filtered.map(order => {
+                const st = statusColors[order.orderStatus] || statusColors.pending;
+                return (
+                  <tr key={order._id} className='cursor-pointer transition-colors duration-150' style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    onClick={() => setSelectedOrder(order)}>
+                    <td className='px-4 py-3'><span className='text-[11px] font-bold' style={{ color: '#818cf8', fontFamily: "'JetBrains Mono',monospace" }}>#{order._id.slice(-6).toUpperCase()}</span></td>
+                    <td className='px-4 py-3'>
+                      <p className='text-[11px] font-medium text-white'>{order.shippingInfo.fullName}</p>
+                      <p className='text-[9px]' style={{ color: muted }}>{order.shippingInfo.phone}</p>
+                    </td>
+                    <td className='px-4 py-3 text-[11px]' style={{ color: secondary }}>{new Date(order.createdAt).toLocaleDateString('vi-VN')}</td>
+                    <td className='px-4 py-3 text-right text-[11px] font-bold text-white' style={{ fontVariantNumeric: 'tabular-nums' }}>{order.totalPrice.toLocaleString('vi-VN')}đ</td>
+                    <td className='px-4 py-3'>
+                      <span className='text-[9px] font-semibold px-2 py-0.5 rounded-full' style={{ background: st.bg, color: st.color, border: `1px solid ${st.border}` }}>{st.label}</span>
+                    </td>
+                    <td className='px-4 py-3 text-right'>
+                      <div className='w-9 h-9 rounded-lg flex items-center justify-center ml-auto' style={{ background: 'rgba(255,255,255,0.03)' }}>
+                        <svg className='w-4 h-4' fill='none' stroke='rgba(255,255,255,0.3)' strokeWidth='1.5' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M15 12a3 3 0 11-6 0 3 3 0 016 0z'/><path strokeLinecap='round' strokeLinejoin='round' d='M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'/></svg>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </main>
 
-      {/* Detail Modal */}
+      {/* Order Detail Modal */}
       {selectedOrder && (
-        <div className='fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md'>
-          <div className='bg-white w-full max-w-5xl rounded-[40px] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300 border border-zinc-100'>
-             <div className='flex flex-col lg:flex-row h-full max-h-[90vh]'>
-                
-                {/* Left: Content Area */}
-                <div className='flex-1 p-8 md:p-12 overflow-y-auto custom-scrollbar'>
-                   <div className='flex items-center justify-between mb-10'>
-                      <div>
-                        <h2 className='text-3xl font-black uppercase tracking-tighter'>Đơn hàng #{selectedOrder._id.slice(-6).toUpperCase()}</h2>
-                        <p className='text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1'>
-                          {new Date(selectedOrder.createdAt).toLocaleDateString('vi-VN')} | {new Date(selectedOrder.createdAt).toLocaleTimeString('vi-VN')}
-                        </p>
-                      </div>
-                      <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${statusMap[selectedOrder.orderStatus].color}`}>
-                         {statusMap[selectedOrder.orderStatus].label}
-                      </div>
-                   </div>
-
-                   <div className='grid grid-cols-1 md:grid-cols-2 gap-10'>
-                      {/* Products */}
-                      <div className='space-y-6'>
-                         <div className='flex items-center gap-3'>
-                            <div className='w-1 h-4 bg-black rounded-full' />
-                            <h3 className='text-[10px] font-black uppercase tracking-widest text-zinc-400'>Danh sách sản phẩm</h3>
-                         </div>
-                         <div className='space-y-4'>
-                            {selectedOrder.items.map((item, i) => (
-                              <div key={i} className='flex items-center gap-4 bg-zinc-50 p-4 rounded-[2rem] border border-zinc-100 group hover:border-black transition-all'>
-                                 <div className='w-20 h-20 bg-white rounded-2xl overflow-hidden shrink-0 border border-zinc-100 p-2'>
-                                    <img src={item.image} alt={item.name} className='w-full h-full object-contain group-hover:scale-110 transition-transform duration-700' />
-                                 </div>
-                                 <div className='flex-1 min-w-0'>
-                                    <p className='text-xs font-black uppercase leading-tight truncate'>{item.name}</p>
-                                    <p className='text-[10px] text-zinc-400 font-bold mt-1 uppercase'>Size: {item.size} | SL: {item.quantity}</p>
-                                    <p className='text-xs font-black mt-2'>{item.price.toLocaleString('vi-VN')}đ</p>
-                                 </div>
-                              </div>
-                            ))}
-                         </div>
-                         
-                         <div className='pt-6 border-t border-zinc-100 flex justify-between items-center'>
-                            <span className='text-sm font-black uppercase tracking-tighter'>Tổng thanh toán</span>
-                            <span className='text-2xl font-black tracking-tighter text-blue-600'>{selectedOrder.totalPrice.toLocaleString('vi-VN')}đ</span>
-                         </div>
-                      </div>
-
-                      {/* Shipping & Notes */}
-                      <div className='space-y-8'>
-                         <div className='bg-zinc-50 p-8 rounded-[2.5rem] border border-zinc-100'>
-                            <h3 className='text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-6'>Thông tin giao hàng</h3>
-                            <div className='space-y-3'>
-                               <div className='flex items-center gap-3'>
-                                  <div className='w-8 h-8 rounded-full bg-white flex items-center justify-center text-xs'>👤</div>
-                                  <p className='text-sm font-black uppercase'>{selectedOrder.shippingInfo.fullName}</p>
-                               </div>
-                               <div className='flex items-center gap-3'>
-                                  <div className='w-8 h-8 rounded-full bg-white flex items-center justify-center text-xs'>📞</div>
-                                  <p className='text-xs font-bold text-zinc-500'>{selectedOrder.shippingInfo.phone}</p>
-                               </div>
-                               <div className='flex items-start gap-3 pt-2 border-t border-zinc-200 mt-2'>
-                                  <div className='w-8 h-8 rounded-full bg-white flex items-center justify-center text-xs shrink-0'>📍</div>
-                                  <p className='text-xs text-zinc-500 leading-relaxed'>
-                                     {selectedOrder.shippingInfo.street}, {selectedOrder.shippingInfo.ward},<br/>
-                                     {selectedOrder.shippingInfo.district}, {selectedOrder.shippingInfo.city}
-                                  </p>
-                               </div>
-                            </div>
-                         </div>
-
-                         {selectedOrder.note && (
-                           <div className='bg-zinc-50 p-6 rounded-[2rem] border border-zinc-100 border-l-4 border-l-black'>
-                              <p className='text-[10px] font-black uppercase text-zinc-400 mb-2'>Ghi chú của khách</p>
-                              <p className='text-xs italic text-zinc-600 font-medium'>"{selectedOrder.note}"</p>
-                           </div>
-                         )}
-                      </div>
-                   </div>
+        <div className='fixed inset-0 z-[100] flex items-center justify-center p-4' style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
+          <div className='w-full max-w-4xl rounded-2xl overflow-hidden flex flex-col md:flex-row max-h-[85vh]' style={{ background: 'rgba(15,20,35,0.95)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            {/* Left: Details */}
+            <div className='flex-1 p-6 overflow-y-auto' style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className='flex items-center justify-between mb-6'>
+                <div>
+                  <h2 className='text-[16px] font-bold text-white'>Đơn hàng <span style={{ color: '#818cf8', fontFamily: "'JetBrains Mono',monospace" }}>#{selectedOrder._id.slice(-6).toUpperCase()}</span></h2>
+                  <p className='text-[11px] mt-0.5' style={{ color: muted }}>{new Date(selectedOrder.createdAt).toLocaleDateString('vi-VN')}</p>
                 </div>
-
-                {/* Right: Actions Sidebar */}
-                <div className='w-full lg:w-[320px] bg-zinc-50 border-l border-zinc-100 p-8 flex flex-col'>
-                   <button 
-                     onClick={() => setSelectedOrder(null)}
-                     className='w-full bg-white text-black font-black py-5 rounded-full text-[10px] uppercase tracking-widest shadow-sm hover:bg-black hover:text-white transition-all mb-10 active:scale-95 border border-zinc-100'
-                   >
-                      Đóng cửa sổ
-                   </button>
-
-                   <div className='flex-1 space-y-8'>
-                      <div className='space-y-4'>
-                         <h3 className='text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 text-center'>Cập nhật trạng thái</h3>
-                         <div className='grid grid-cols-1 gap-3'>
-                            {Object.entries(statusMap).map(([key, val]) => (
-                              <button
-                                key={key}
-                                onClick={() => handleUpdateStatus(selectedOrder._id, key)}
-                                className={`px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border-2 flex items-center justify-between group ${
-                                  selectedOrder.orderStatus === key 
-                                  ? 'border-black bg-black text-white shadow-xl translate-x-2' 
-                                  : 'border-white bg-white text-zinc-400 hover:border-zinc-200'
-                                }`}
-                              >
-                                {val.label}
-                                {selectedOrder.orderStatus === key && (
-                                   <div className='w-2 h-2 rounded-full bg-blue-400 animate-pulse' />
-                                )}
-                              </button>
-                            ))}
-                         </div>
-                      </div>
-                   </div>
-
-                   <div className='mt-auto pt-8'>
-                      <div className='bg-black text-white p-6 rounded-[2rem] relative overflow-hidden group'>
-                         <div className='relative z-10'>
-                            <p className='text-[9px] font-black uppercase tracking-widest opacity-40 mb-2'>Giao dịch</p>
-                            <p className='text-xs font-black uppercase'>{selectedOrder.paymentMethod === 'cod' ? 'Thanh toán COD' : 'Đã thanh toán Online'}</p>
-                         </div>
-                         <div className='absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform'>
-                            <svg className='w-24 h-24' fill='currentColor' viewBox='0 0 24 24'><path d='M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'/></svg>
-                         </div>
-                      </div>
-                   </div>
+                <span className='text-[9px] font-semibold px-2 py-0.5 rounded-full' style={{ background: statusColors[selectedOrder.orderStatus]?.bg, color: statusColors[selectedOrder.orderStatus]?.color, border: `1px solid ${statusColors[selectedOrder.orderStatus]?.border}` }}>
+                  {statusColors[selectedOrder.orderStatus]?.label}
+                </span>
+              </div>
+              {selectedOrder.items.map((item, i) => (
+                <div key={i} className='flex items-center gap-4 py-3' style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                  <div className='w-14 h-14 rounded-lg shrink-0 p-1.5 flex items-center justify-center' style={{ background: 'rgba(255,255,255,0.05)' }}>
+                    <img src={item.image} alt={item.name} className='w-full h-full object-contain' />
+                  </div>
+                  <div className='flex-1 min-w-0'>
+                    <p className='text-[12px] font-medium text-white truncate'>{item.name}</p>
+                    <p className='text-[10px]' style={{ color: muted }}>Size: {item.size} · SL: {item.quantity}</p>
+                  </div>
+                  <p className='text-[12px] font-bold text-white'>{item.price.toLocaleString('vi-VN')}đ</p>
                 </div>
-
-             </div>
+              ))}
+              <div className='mt-4 p-4 rounded-xl' style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <p className='text-[9px] font-semibold uppercase tracking-[0.1em] mb-2' style={{ color: muted }}>Giao hàng</p>
+                <p className='text-[13px] font-semibold text-white'>{selectedOrder.shippingInfo?.fullName}</p>
+                <p className='text-[11px] mt-1' style={{ color: secondary }}>{selectedOrder.shippingInfo?.phone}</p>
+                <p className='text-[10px] mt-1' style={{ color: muted }}>{selectedOrder.shippingInfo?.street}, {selectedOrder.shippingInfo?.ward}, {selectedOrder.shippingInfo?.district}, {selectedOrder.shippingInfo?.city}</p>
+              </div>
+              <div className='mt-4 flex items-center justify-between'>
+                <span className='text-[10px] font-semibold uppercase' style={{ color: muted }}>Tổng</span>
+                <span className='text-[20px] font-extrabold text-white' style={{ fontVariantNumeric: 'tabular-nums' }}>{selectedOrder.totalPrice.toLocaleString('vi-VN')}đ</span>
+              </div>
+            </div>
+            {/* Right: Actions */}
+            <div className='w-full md:w-[260px] p-6 flex flex-col'>
+              <div className='flex justify-end mb-6'>
+                <button onClick={() => setSelectedOrder(null)} className='w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer' style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <svg className='w-4 h-4' fill='none' stroke='rgba(255,255,255,0.5)' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12'/></svg>
+                </button>
+              </div>
+              <p className='text-[10px] font-semibold uppercase tracking-[0.1em] mb-3 text-center' style={{ color: muted }}>CẬP NHẬT TRẠNG THÁI</p>
+              <div className='space-y-2 flex-1'>
+                {Object.entries(statusColors).map(([key, val]) => (
+                  <button key={key} onClick={() => handleUpdateStatus(selectedOrder._id, key)}
+                    className='w-full py-3 rounded-lg text-[10px] font-semibold uppercase tracking-[0.08em] transition-all duration-150 cursor-pointer flex items-center justify-center gap-2'
+                    style={{
+                      background: selectedOrder.orderStatus === key ? val.bg : 'rgba(255,255,255,0.03)',
+                      border: `1px solid ${selectedOrder.orderStatus === key ? val.border : 'rgba(255,255,255,0.06)'}`,
+                      color: selectedOrder.orderStatus === key ? val.color : 'rgba(255,255,255,0.4)',
+                    }}
+                    onMouseEnter={e => { if (selectedOrder.orderStatus !== key) { e.currentTarget.style.background = val.hover; e.currentTarget.style.color = val.color; e.currentTarget.style.borderColor = val.border; }}}
+                    onMouseLeave={e => { if (selectedOrder.orderStatus !== key) { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; }}}
+                  >
+                    {val.label}
+                    {selectedOrder.orderStatus === key && <div className='w-1.5 h-1.5 rounded-full' style={{ background: val.color }} />}
+                  </button>
+                ))}
+              </div>
+              <div className='mt-4 p-4 rounded-xl' style={{ background: 'linear-gradient(135deg, rgba(109,40,217,0.3), rgba(13,148,136,0.15))', border: '1px solid rgba(124,58,237,0.2)' }}>
+                <p className='text-[9px] font-semibold uppercase tracking-[0.1em]' style={{ color: 'rgba(255,255,255,0.4)' }}>Giao dịch</p>
+                <p className='text-[11px] font-bold text-white mt-1'>{selectedOrder.paymentMethod === 'cod' ? 'COD' : 'Online'}</p>
+              </div>
+            </div>
           </div>
         </div>
       )}

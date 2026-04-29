@@ -236,6 +236,11 @@ export const getOrderStats = asyncHandler(async (req, res) => {
     revenueMonth,
     revenueYear,
     totalOrders,
+    pendingOrders,
+    confirmedOrders,
+    shippingOrders,
+    deliveredOrders,
+    cancelledOrders,
     totalCustomers,
     recentOrders,
   ] = await Promise.all([
@@ -270,6 +275,11 @@ export const getOrderStats = asyncHandler(async (req, res) => {
       { $group: { _id: null, total: { $sum: '$totalPrice' } } },
     ]),
     Order.countDocuments(),
+    Order.countDocuments({ orderStatus: 'pending' }),
+    Order.countDocuments({ orderStatus: 'confirmed' }),
+    Order.countDocuments({ orderStatus: 'shipping' }),
+    Order.countDocuments({ orderStatus: 'delivered' }),
+    Order.countDocuments({ orderStatus: 'cancelled' }),
     User.countDocuments({ role: 'user' }),
     Order.find().sort('-createdAt').limit(5).populate('user', 'name'),
   ]);
@@ -284,6 +294,11 @@ export const getOrderStats = asyncHandler(async (req, res) => {
       },
       orders: {
         total: totalOrders,
+        pending: pendingOrders,
+        confirmed: confirmedOrders,
+        shipping: shippingOrders,
+        delivered: deliveredOrders,
+        cancelled: cancelledOrders,
       },
       customers: totalCustomers,
       recentOrders: recentOrders.map((o) => ({

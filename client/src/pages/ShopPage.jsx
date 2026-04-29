@@ -172,7 +172,12 @@ export default function ShopPage() {
               <div className='absolute left-0 top-0 h-full w-72 bg-white p-6 overflow-y-auto'>
                 <div className='flex justify-between items-center mb-4'>
                   <h3 className='font-black uppercase'>Bộ lọc</h3>
-                  <button onClick={() => setSidebarOpen(false)}>✕</button>
+                  <button 
+                    onClick={() => setSidebarOpen(false)}
+                    className='w-8 h-8 flex items-center justify-center rounded-full text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all duration-300'
+                  >
+                    <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2.5' d='M6 18L18 6M6 6l12 12'/></svg>
+                  </button>
                 </div>
                 <FilterSidebar
                   filters={filters}

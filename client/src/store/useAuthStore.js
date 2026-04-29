@@ -6,6 +6,7 @@ import {
   googleLoginAPI,
   getMeAPI,
   updateMeAPI,
+  toggleWishlistAPI,
 } from '../services/authService';
 
 const useAuthStore = create(
@@ -73,6 +74,19 @@ const useAuthStore = create(
           const message = err.response?.data?.message || 'Cập nhật thất bại.';
           set({ error: message, loading: false });
           return { success: false, message };
+        }
+      },
+
+      toggleWishlist: async (productId) => {
+        try {
+          const { data } = await toggleWishlistAPI(productId);
+          const newUser = { ...get().user };
+          // data.wishlist contains array of IDs from backend
+          newUser.wishlist = data.wishlist;
+          set({ user: newUser });
+          return { success: true, wishlisted: data.wishlisted };
+        } catch (err) {
+          return { success: false };
         }
       },
 

@@ -537,9 +537,9 @@ export default function CheckoutPage() {
                           <p className='text-xs font-black uppercase leading-tight line-clamp-2'>{item.name}</p>
                           <button 
                             onClick={() => removeItem(item._id, item.selectedSize)}
-                            className='text-zinc-300 hover:text-red-500 transition-colors p-1'
+                            className='text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-full p-1.5 transition-all duration-300'
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                           </button>
                         </div>
                         <p className='text-[10px] text-zinc-400 font-bold uppercase mt-1'>Size EU {item.selectedSize}</p>

@@ -8,6 +8,8 @@ import {
   changePassword,
   toggleWishlist,
   getAllUsers,
+  updateUserByAdmin,
+  deleteUserByAdmin,
 } from '../controllers/authController.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -26,5 +28,7 @@ router.post('/wishlist/:productId', protect, toggleWishlist);
 
 // Admin
 router.get('/admin/users', protect, authorize('admin'), getAllUsers);
+router.put('/admin/users/:id', protect, authorize('admin'), updateUserByAdmin);
+router.delete('/admin/users/:id', protect, authorize('admin'), deleteUserByAdmin);
 
 export default router;

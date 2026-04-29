@@ -18,7 +18,7 @@ export const getProducts = asyncHandler(async (req, res) => {
     sort = '-createdAt',
   } = req.query;
 
-  const filter = { isActive: true };
+  const filter = req.query.admin === 'true' ? {} : { isActive: true };
 
   if (search) {
     filter.$or = [

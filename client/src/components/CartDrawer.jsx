@@ -53,13 +53,13 @@ export default function CartDrawer({ open, onClose }) {
             )}
             <button
               onClick={onClose}
-              className='w-9 h-9 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center transition'
+              className='w-10 h-10 rounded-full flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all duration-300'
             >
               <svg
                 className='w-5 h-5'
                 fill='none'
                 stroke='currentColor'
-                strokeWidth='2'
+                strokeWidth='2.5'
                 viewBox='0 0 24 24'
               >
                 <path d='M18 6 6 18M6 6l12 12' />
@@ -152,18 +152,16 @@ export default function CartDrawer({ open, onClose }) {
                     </div>
                     <button
                       onClick={() => removeItem(item._id, item.selectedSize)}
-                      className='text-zinc-300 hover:text-red-500 transition'
+                      className='w-8 h-8 flex items-center justify-center rounded-full text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-all duration-300'
                     >
                       <svg
-                        className='w-5 h-5'
+                        className='w-4 h-4'
                         fill='none'
                         stroke='currentColor'
-                        strokeWidth='2'
+                        strokeWidth='2.5'
                         viewBox='0 0 24 24'
                       >
-                        <polyline points='3 6 5 6 21 6' />
-                        <path d='M19 6l-1 14H6L5 6' />
-                        <path d='M10 11v6M14 11v6M9 6V4h6v2' />
+                        <path d='M18 6 6 18M6 6l12 12' />
                       </svg>
                     </button>
                   </div>

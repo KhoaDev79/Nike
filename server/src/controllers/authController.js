@@ -172,3 +172,28 @@ export const getAllUsers = asyncHandler(async (req, res) => {
   const users = await User.find({}).sort('-createdAt');
   res.json({ success: true, data: users });
 });
+
+// @route  PUT /api/auth/admin/users/:id  — Admin
+export const updateUserByAdmin = asyncHandler(async (req, res) => {
+  const { name, email, role, avatar, isActive } = req.body;
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { name, email, role, avatar, isActive },
+    { new: true, runValidators: true }
+  );
+  if (!user) {
+    res.status(404);
+    throw new Error('Không tìm thấy người dùng');
+  }
+  res.json({ success: true, data: user });
+});
+
+// @route  DELETE /api/auth/admin/users/:id  — Admin
+export const deleteUserByAdmin = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+  if (!user) {
+    res.status(404);
+    throw new Error('Không tìm thấy người dùng');
+  }
+  res.json({ success: true, message: 'Xoá người dùng thành công' });
+});
