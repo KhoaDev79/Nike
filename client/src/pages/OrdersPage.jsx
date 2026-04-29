@@ -60,7 +60,7 @@ export default function OrdersPage() {
   };
 
   const handleReorder = (order) => {
-    // Navigate to shop or add to cart? 
+    // Navigate to shop or add to cart?
     // For now, let's just go to shop as a simple reorder
     navigate('/shop');
     toast.success('Hãy chọn lại các sản phẩm bạn yêu thích!');
@@ -72,14 +72,14 @@ export default function OrdersPage() {
     <div className='min-h-screen bg-[#F0F2F5] pb-32'>
       {/* Cinematic Header */}
       <div className='relative h-[400px] overflow-hidden flex items-center justify-center'>
-         <div 
-           className='absolute inset-0 bg-cover bg-center scale-110 blur-[2px] brightness-75' 
+         <div
+           className='absolute inset-0 bg-cover bg-center scale-110 blur-[2px] brightness-75'
            style={{ backgroundImage: `url('/orders_banner.png')` }}
          />
          <div className='absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-[#F0F2F5]' />
-         
+
          <div className='relative z-10 text-center space-y-4'>
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               className='text-6xl md:text-8xl font-black text-white uppercase tracking-tighter drop-shadow-2xl italic'
@@ -100,8 +100,8 @@ export default function OrdersPage() {
               key={key}
               onClick={() => setActiveFilter(key)}
               className={`whitespace-nowrap px-8 py-3.5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${
-                activeFilter === key 
-                  ? 'bg-black text-white shadow-2xl scale-105' 
+                activeFilter === key
+                  ? 'bg-black text-white shadow-2xl scale-105'
                   : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100 hover:text-black'
               }`}
             >
@@ -117,7 +117,7 @@ export default function OrdersPage() {
             ))}
           </div>
         ) : filteredOrders.length === 0 ? (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className='bg-white rounded-[3rem] p-24 text-center shadow-sm border border-white'
@@ -166,7 +166,7 @@ export default function OrdersPage() {
                                 </span>
                                 <span className='text-[10px] font-black text-zinc-300 uppercase tracking-widest'>#{order._id.slice(-8).toUpperCase()}</span>
                              </div>
-                             
+
                              <div>
                                 <h3 className='text-sm font-black uppercase text-zinc-900'>
                                    {new Date(order.createdAt).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })}
@@ -177,15 +177,15 @@ export default function OrdersPage() {
                              </div>
 
                              <div className='flex gap-4 pt-4'>
-                                <Link 
+                                <Link
                                   to={`/orders/${order._id}`}
                                   className='bg-zinc-100 text-black px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all'
                                 >
                                    Chi tiết
                                 </Link>
-                                
+
                                 {order.orderStatus === 'pending' && (
-                                   <button 
+                                   <button
                                      onClick={() => handleCancelOrder(order._id)}
                                      className='text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 px-6 py-2.5 rounded-full transition-all'
                                    >
@@ -194,7 +194,7 @@ export default function OrdersPage() {
                                 )}
 
                                 {order.orderStatus === 'delivered' && (
-                                   <button 
+                                   <button
                                      onClick={() => handleReorder(order)}
                                      className='text-[10px] font-black uppercase tracking-widest text-blue-600 hover:bg-blue-50 px-6 py-2.5 rounded-full transition-all'
                                    >
@@ -226,7 +226,7 @@ export default function OrdersPage() {
       </div>
 
       {/* Floating Action Button for Help */}
-      <motion.button 
+      <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         className='fixed bottom-10 right-10 w-16 h-16 bg-black text-white rounded-full shadow-2xl flex items-center justify-center group z-50'

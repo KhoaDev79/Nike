@@ -82,6 +82,46 @@ export default function CheckoutPage() {
       .catch(() => toast.error('Không thể tải danh sách quận/huyện'));
   }, [selectedProvince]);
 
+  // ── Auto-fill Saved Address ──────────────────────────────────
+  const handleSelectSavedAddress = async (addr) => {
+    try {
+      // 1. Fill basic fields
+      setForm({
+        ...form,
+        fullName: addr.fullName,
+        phone: addr.phone,
+        street: addr.street,
+      });
+
+      // 2. Find and set Province
+      const pMatch = provinces.find(p => p.name === addr.city);
+      if (pMatch) {
+        setSelectedProvince(pMatch.code);
+        
+        // 3. Find and set District (Need to fetch first)
+        const dRes = await fetch(`${API_PROVINCES}/p/${pMatch.code}?depth=2`).then(res => res.json());
+        const dMatch = (dRes.districts || []).find(d => d.name === addr.district);
+        
+        if (dMatch) {
+          setDistricts(dRes.districts);
+          setSelectedDistrict(dMatch.code);
+
+          // 4. Find and set Ward
+          const wRes = await fetch(`${API_PROVINCES}/d/${dMatch.code}?depth=2`).then(res => res.json());
+          const wMatch = (wRes.wards || []).find(w => w.name === addr.ward);
+          
+          if (wMatch) {
+            setWards(wRes.wards);
+            setSelectedWard(wMatch.code);
+          }
+        }
+      }
+      toast.success('Đã áp dụng địa chỉ đã lưu');
+    } catch (error) {
+      toast.error('Lỗi khi áp dụng địa chỉ');
+    }
+  };
+
   // ── Fetch phường/xã khi chọn quận ─────────────────────────────
   useEffect(() => {
     if (!selectedDistrict) {
@@ -266,7 +306,21 @@ export default function CheckoutPage() {
                   <div className='bg-white rounded-[2.5rem] p-8 md:p-12 shadow-sm border border-zinc-100'>
                     <div className='flex items-center justify-between mb-10'>
                       <h2 className='text-2xl font-black uppercase tracking-tighter'>Thông tin nhận hàng</h2>
-                      {!user && (
+                      {user ? (
+                         user.addresses?.length > 0 && (
+                            <div className='flex gap-2 overflow-x-auto pb-2 no-scrollbar'>
+                               {user.addresses.map((addr, idx) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => handleSelectSavedAddress(addr)}
+                                    className='whitespace-nowrap px-4 py-2 bg-zinc-100 hover:bg-black hover:text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all'
+                                  >
+                                    {addr.isDefault ? '🏠 Mặc định' : `📍 Đ/chỉ ${idx + 1}`}
+                                  </button>
+                               ))}
+                            </div>
+                         )
+                      ) : (
                          <Link to='/auth' className='text-xs font-black uppercase tracking-widest border-b-2 border-black pb-1 hover:text-zinc-500 hover:border-zinc-300 transition'>Đăng nhập</Link>
                       )}
                     </div>

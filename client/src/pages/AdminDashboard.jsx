@@ -139,8 +139,8 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody className='divide-y divide-zinc-50'>
                   {stats.recentOrders.map((order) => (
-                    <tr 
-                      key={order.id} 
+                    <tr
+                      key={order.id}
                       onClick={() => setSelectedOrder(order)}
                       className='hover:bg-zinc-50 transition cursor-pointer group'
                     >
@@ -169,7 +169,7 @@ export default function AdminDashboard() {
                       const maxRevenue = Math.max(...stats.chartData.map(d => d.revenue), 1);
                       return (
                         <div key={i} className='flex-1 flex flex-col justify-end h-full group relative'>
-                           <div 
+                           <div
                              className='w-full bg-blue-100 group-hover:bg-blue-600 transition-all cursor-pointer rounded-t-sm'
                              style={{ height: `${Math.max((day.revenue / maxRevenue) * 100, 5)}%` }}
                            >
@@ -194,7 +194,7 @@ export default function AdminDashboard() {
                   <h3 className='text-[10px] font-black uppercase tracking-widest opacity-40 mb-2'>Báo cáo chi tiết</h3>
                   <p className='text-sm leading-relaxed font-bold'>Xem phân tích chuyên sâu về doanh thu và hiệu quả sản phẩm.</p>
                   <div className='mt-6 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest'>
-                     Khám phá ngay 
+                     Khám phá ngay
                      <svg className='w-4 h-4 group-hover:translate-x-1 transition-transform' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M17 8l4 4m0 0l-4 4m4-4H3'/></svg>
                   </div>
                </div>
@@ -217,7 +217,7 @@ export default function AdminDashboard() {
                   {new Date(selectedOrder.date).toLocaleDateString('vi-VN')} | {new Date(selectedOrder.date).toLocaleTimeString('vi-VN')}
                 </p>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedOrder(null)}
                 className='w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-zinc-50 transition-all hover:rotate-90 active:scale-95 border border-zinc-100'
               >
@@ -290,13 +290,13 @@ export default function AdminDashboard() {
                <div className='absolute right-0 top-0 opacity-10 -mr-10 -mt-10'>
                   <svg className='w-40 h-40 fill-white' viewBox='0 0 192.756 192.756'><path d='M42.741 71.477c-9.881 11.604-19.355 25.994-19.45 36.75-.037 4.047 1.255 7.58 4.354 10.256 4.46 3.854 9.374 5.213 14.264 5.221 7.146.01 14.242-2.873 19.798-5.096 9.357-3.742 112.79-48.659 112.79-48.659.998-.5.811-1.123-.438-.812-.504.126-112.603 30.505-112.603 30.505a24.771 24.771 0 0 1-6.524.934c-8.615.051-16.281-4.731-16.219-14.808.024-3.943 1.231-8.698 4.028-14.291z' /></svg>
                </div>
-               
+
                <div className='relative z-10'>
                   <p className='text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1'>Tổng thanh toán</p>
                   <p className='text-4xl font-black tracking-tighter'>{selectedOrder.total.toLocaleString('vi-VN')}đ</p>
                </div>
 
-               <button 
+               <button
                 onClick={() => setSelectedOrder(null)}
                 className='relative z-10 bg-white text-black font-black px-8 py-3 rounded-full text-[10px] uppercase tracking-widest hover:bg-zinc-100 transition-all active:scale-95'
                >
