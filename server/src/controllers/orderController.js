@@ -103,13 +103,13 @@ export const createOrder = asyncHandler(async (req, res) => {
       <p>Chúng tôi sẽ đóng gói và giao hàng trong thời gian sớm nhất. Chúc bạn một ngày tốt lành!</p>
     `;
 
-    await sendEmail({
+    sendEmail({
       email: req.user.email,
       subject: `Xác nhận đơn hàng #${order._id} - Nike Football Shop`,
       html,
-    });
+    }).catch((error) => console.error('Lỗi khi gửi email:', error));
   } catch (error) {
-    console.error('Lỗi khi gửi email:', error);
+    console.error('Lỗi trong quá trình xử lý email:', error);
   }
 
   res.status(201).json({ success: true, data: order });
