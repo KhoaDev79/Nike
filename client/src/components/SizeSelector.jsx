@@ -23,7 +23,7 @@ export default function SizeSelector({ sizes = [], selected, onChange }) {
         )}
       </div>
 
-      <div className='grid grid-cols-5 sm:grid-cols-6 gap-2'>
+      <div className='grid grid-cols-6 sm:grid-cols-8 gap-2'>
         {sizes.map(({ size, stock }) => {
           const isSelected = selected === size;
           const isOutOfStock = stock === 0;
@@ -37,7 +37,7 @@ export default function SizeSelector({ sizes = [], selected, onChange }) {
                 isOutOfStock ? 'Hết hàng' : `Size ${size} — còn ${stock} đôi`
               }
               className={`
-                relative aspect-square rounded-xl border-2 text-sm font-bold
+                relative aspect-square rounded-lg border-2 text-xs font-black
                 flex items-center justify-center transition-all duration-200
                 ${
                   isSelected
