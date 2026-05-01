@@ -18,6 +18,21 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #27272a;
   }
+
+  /* Custom scrollbar for dark-mode dropdowns */
+  .dropdown-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+  .dropdown-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .dropdown-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+  }
+  .dropdown-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
 }
 
 @layer utilities {
@@ -30,4 +45,3 @@
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
 }
-

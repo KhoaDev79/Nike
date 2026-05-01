@@ -127,7 +127,7 @@ export default function AuthPage() {
     }`;
 
   return (
-    <div className='min-h-screen bg-zinc-50 flex items-center justify-center px-4 py-12'>
+    <div className='min-h-screen bg-zinc-50 flex items-center justify-center px-4 pt-28 pb-12'>
       <div className='w-full max-w-md'>
         {/* Logo */}
         <div className='text-center mb-8'>

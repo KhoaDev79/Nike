@@ -242,7 +242,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className='min-h-screen bg-[#f5f5f7] pb-32'>
+    <div className='min-h-screen bg-[#f5f5f7] pt-20 md:pt-28 pb-32'>
       {/* Premium Loader Overlay */}
       <AnimatePresence>
         {loading && (

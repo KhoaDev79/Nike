@@ -56,7 +56,7 @@ export default function OrderDetailPage() {
   const st = STATUS_MAP[order.orderStatus] || STATUS_MAP.pending;
 
   return (
-    <div className='min-h-screen bg-[#f5f5f7] pb-32 selection:bg-black selection:text-white'>
+    <div className='min-h-screen bg-[#f5f5f7] pt-20 md:pt-28 pb-32 selection:bg-black selection:text-white'>
       
       {/* Background Watermark Swoosh */}
       <div className='fixed top-0 right-0 opacity-[0.02] pointer-events-none -mr-40 -mt-20'>

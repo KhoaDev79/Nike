@@ -119,7 +119,7 @@ export default function ProductDetail() {
   });
 
   return (
-    <div className='bg-white'>
+    <div className='bg-white pt-20 md:pt-28'>
       <div className='max-w-7xl mx-auto px-6 py-12'>
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-12'>
           {/* ── Images ─────────────────────────────────────── */}
