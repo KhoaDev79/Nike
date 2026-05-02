@@ -24,6 +24,7 @@ export const getProducts = asyncHandler(async (req, res) => {
     filter.$or = [
       { name: { $regex: search, $options: 'i' } },
       { tags: { $in: [new RegExp(search, 'i')] } },
+      { sku: { $regex: search, $options: 'i' } },
     ];
   }
 
@@ -121,6 +122,7 @@ export const createProduct = asyncHandler(async (req, res) => {
     category, tier, surfaceType, sizes,
     color, colorHex, tags,
     isActive, isFeatured,
+    sku, weight, specs
   } = req.body;
 
   if (!name || !price || !description) {
@@ -136,8 +138,15 @@ export const createProduct = asyncHandler(async (req, res) => {
     throw new Error('Cần ít nhất 1 size sản phẩm.');
   }
 
+  // Generate a random SKU if not provided
+  let finalSku = sku;
+  if (!finalSku) {
+     finalSku = `NK-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+  }
+
   const product = await Product.create({
     name,
+    sku: finalSku,
     description,
     price: Number(price),
     originalPrice: originalPrice ? Number(originalPrice) : undefined,
@@ -149,6 +158,8 @@ export const createProduct = asyncHandler(async (req, res) => {
     color: color || '',
     colorHex: colorHex || '#000000',
     tags: tags || [],
+    weight: weight ? Number(weight) : null,
+    specs: specs || [],
     isActive: isActive ?? true,
     isFeatured: isFeatured ?? false,
   });
@@ -164,10 +175,21 @@ export const updateProduct = asyncHandler(async (req, res) => {
     throw new Error('Không tìm thấy sản phẩm.');
   }
 
-  const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  if (req.body.sizes) {
+    req.body.sizes = req.body.sizes.map(s => ({
+      size: Number(s.size),
+      stock: Number(s.stock || 0)
+    }));
+    // Explicitly recalculate totalStock before update
+    req.body.totalStock = req.body.sizes.reduce((sum, s) => sum + s.stock, 0);
+  }
+
+  const updated = await Product.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { returnDocument: 'after', runValidators: true }
+  );
+  
   res.json({ success: true, data: updated });
 });
 

@@ -214,7 +214,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   };
 
   const order = await Order.findByIdAndUpdate(req.params.id, update, {
-    new: true,
+    returnDocument: 'after',
   }).populate('user', 'name email');
   if (!order) {
     res.status(404);
@@ -323,37 +323,53 @@ export const getOrderStats = asyncHandler(async (req, res) => {
 
 // @route  GET /api/orders/insights  — Private/Admin
 export const getCustomerInsights = asyncHandler(async (req, res) => {
-  const insights = await Order.aggregate([
-    {
-      $group: {
-        _id: '$user',
-        orderCount: { $sum: 1 },
-        totalSpent: { $sum: '$totalPrice' },
-        lastOrder: { $max: '$createdAt' },
-      },
-    },
+  const insights = await User.aggregate([
     {
       $lookup: {
-        from: 'users',
+        from: 'orders',
         localField: '_id',
-        foreignField: '_id',
-        as: 'userInfo',
+        foreignField: 'user',
+        as: 'orders',
       },
     },
-    { $unwind: '$userInfo' },
     {
       $project: {
         _id: 1,
-        orderCount: 1,
-        totalSpent: 1,
-        lastOrder: 1,
-        name: '$userInfo.name',
-        email: '$userInfo.email',
-        avatar: '$userInfo.avatar',
-        role: '$userInfo.role',
+        name: 1,
+        email: 1,
+        avatar: 1,
+        role: 1,
+        isActive: 1,
+        createdAt: 1,
+        // Chỉ đếm số lượng đơn không bị hủy
+        orderCount: {
+          $size: {
+            $filter: {
+              input: '$orders',
+              as: 'order',
+              cond: { $ne: ['$$order.orderStatus', 'cancelled'] },
+            },
+          },
+        },
+        // Chỉ tính tổng tiền các đơn không bị hủy
+        totalSpent: {
+          $sum: {
+            $map: {
+              input: {
+                $filter: {
+                  input: '$orders',
+                  as: 'order',
+                  cond: { $ne: ['$$order.orderStatus', 'cancelled'] },
+                },
+              },
+              as: 'validOrder',
+              in: '$$validOrder.totalPrice',
+            },
+          },
+        },
       },
     },
-    { $sort: { totalSpent: -1 } },
+    { $sort: { createdAt: -1 } }, // Sắp xếp user mới nhất lên đầu
   ]);
   res.json({ success: true, data: insights });
 });

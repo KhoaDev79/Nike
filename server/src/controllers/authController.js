@@ -113,7 +113,7 @@ export const updateMe = asyncHandler(async (req, res) => {
   const user = await User.findByIdAndUpdate(
     req.user._id,
     { name, avatar, addresses },
-    { new: true, runValidators: true },
+    { returnDocument: 'after', runValidators: true },
   );
   res.json({ success: true, data: user });
 });
@@ -179,7 +179,7 @@ export const updateUserByAdmin = asyncHandler(async (req, res) => {
   const user = await User.findByIdAndUpdate(
     req.params.id,
     { name, email, role, avatar, isActive },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
   if (!user) {
     res.status(404);
