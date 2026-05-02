@@ -68,4 +68,24 @@
     line-height: 0.90;
     text-transform: uppercase;
   }
+  .hover-scrollbar {
+    scrollbar-width: none;  /* Firefox */
+  }
+  .hover-scrollbar:hover {
+    scrollbar-width: thin;  /* Firefox */
+    scrollbar-color: #707072 transparent;
+  }
+  .hover-scrollbar::-webkit-scrollbar {
+    height: 8px;
+  }
+  .hover-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .hover-scrollbar::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 10px;
+  }
+  .hover-scrollbar:hover::-webkit-scrollbar-thumb {
+    background-color: #707072;
+  }
 }

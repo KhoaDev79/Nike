@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import { getFeaturedProductsAPI } from '../api/productApi';
+import { getFeaturedProductsAPI, getProductsAPI } from '../api/productApi';
 import ScrollReveal from '../components/ScrollReveal';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -21,6 +21,7 @@ import tierAcademy from '../assets/tier_aca.jpg';
 export default function HomePage() {
   const navigate = useNavigate();
   const [featured, setFeatured] = useState([]);
+  const [newArrivals, setNewArrivals] = useState([]);
   const [loading, setLoading]   = useState(true);
   const [currentHeroImg, setCurrentHeroImg] = useState(0);
 
@@ -46,13 +47,25 @@ export default function HomePage() {
   ];
 
   useEffect(() => {
-    getFeaturedProductsAPI()
-      .then((res) => {
-        // axios: res.data = { success: true, data: [...] }
-        const list = res.data?.data;
-        setFeatured(Array.isArray(list) ? list : []);
+    Promise.all([
+      getProductsAPI({ featured: 'true', limit: 20, sort: '-createdAt' }),
+      getProductsAPI({ limit: 10, sort: '-createdAt' })
+    ])
+      .then(([featuredRes, newArrivalsRes]) => {
+        const rawFeatured = Array.isArray(featuredRes.data?.data) ? featuredRes.data.data : [];
+        const rawNewArrivals = Array.isArray(newArrivalsRes.data?.data) ? newArrivalsRes.data.data : [];
+        
+        // Bộ sưu tập mới là 8 sản phẩm mới nhất
+        const newArrivalsList = rawNewArrivals.slice(0, 8);
+        const newArrivalsIds = new Set(newArrivalsList.map(p => p._id));
+
+        // Sản phẩm nổi bật sẽ lọc bỏ các sản phẩm đã có ở Bộ sưu tập mới (chỉ lấy các sản phẩm cũ hơn)
+        const distinctFeatured = rawFeatured.filter(p => !newArrivalsIds.has(p._id)).slice(0, 8);
+
+        setFeatured(distinctFeatured);
+        setNewArrivals(newArrivalsList);
       })
-      .catch((err) => console.error('Featured API error:', err))
+      .catch((err) => console.error('HomePage API error:', err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -282,8 +295,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FEATURED ───────────────────────────────────────── */}
-      <section className='py-24 bg-white'>
+      {/* ── SẢN PHẨM NỔI BẬT ───────────────────────────────────────── */}
+      <section className='py-24 bg-white overflow-hidden'>
         <div className='max-w-[1400px] mx-auto px-6'>
           <ScrollReveal>
             <div className='flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4'>
@@ -295,29 +308,70 @@ export default function HomePage() {
                   Những siêu phẩm được săn đón nhiều nhất mùa này.
                 </p>
               </div>
-              <Link to='/shop' className='text-sm font-bold uppercase tracking-widest border-b-2 border-black pb-1 hover:text-zinc-500 hover:border-zinc-500 transition-all'>
+              <Link to='/shop?featured=true' className='text-sm font-bold uppercase tracking-widest border-b-2 border-black pb-1 hover:text-zinc-500 hover:border-zinc-500 transition-all'>
                 Xem tất cả
               </Link>
             </div>
           </ScrollReveal>
 
           {loading ? (
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16'>
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className='bg-zinc-100 rounded-[2rem] aspect-square animate-pulse' />
+            <div className='flex gap-4 overflow-x-auto hover-scrollbar pb-8 snap-x snap-mandatory'>
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className='w-[85vw] sm:w-[45vw] md:w-[32vw] xl:w-[430px] bg-[#F5F5F5] aspect-[3/4] animate-pulse snap-start shrink-0' />
               ))}
             </div>
           ) : featured.length > 0 ? (
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16'>
+            <div className='flex gap-4 overflow-x-auto hover-scrollbar pb-8 snap-x snap-mandatory'>
               {featured.map((p, i) => (
-                <ScrollReveal key={p._id} delay={(i % 4) * 0.1} direction="up">
+                <div key={p._id} className='w-[85vw] sm:w-[45vw] md:w-[32vw] xl:w-[430px] snap-start shrink-0'>
                   <ProductCard product={p} />
-                </ScrollReveal>
+                </div>
               ))}
             </div>
           ) : (
             <p className='text-center text-zinc-400 py-12'>
               Chưa có sản phẩm nổi bật. Hãy chạy seed để thêm dữ liệu.
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* ── NEW COLLECTION ───────────────────────────────────────── */}
+      <section className='py-24 bg-white overflow-hidden'>
+        <div className='max-w-[1400px] mx-auto px-6'>
+          <ScrollReveal>
+            <div className='flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4'>
+              <div>
+                <h2 className='text-4xl md:text-5xl font-black uppercase tracking-tight text-black'>
+                  Bộ Sưu Tập Mới
+                </h2>
+                <p className='text-zinc-500 mt-3 md:mt-4 text-base md:text-lg'>
+                  Những thiết kế mới nhất vừa đổ bộ lên kệ.
+                </p>
+              </div>
+              <Link to='/shop' className='text-sm font-bold uppercase tracking-widest border-b-2 border-black pb-1 hover:text-zinc-500 hover:border-zinc-500 transition-all'>
+                Khám phá
+              </Link>
+            </div>
+          </ScrollReveal>
+
+          {loading ? (
+            <div className='flex gap-4 overflow-x-auto hover-scrollbar pb-8 snap-x snap-mandatory'>
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className='w-[85vw] sm:w-[45vw] md:w-[32vw] xl:w-[430px] bg-[#F5F5F5] aspect-[3/4] animate-pulse snap-start shrink-0' />
+              ))}
+            </div>
+          ) : newArrivals.length > 0 ? (
+            <div className='flex gap-4 overflow-x-auto hover-scrollbar pb-8 snap-x snap-mandatory'>
+              {newArrivals.map((p, i) => (
+                <div key={p._id} className='w-[85vw] sm:w-[45vw] md:w-[32vw] xl:w-[430px] snap-start shrink-0'>
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className='text-center text-zinc-400 py-12'>
+              Chưa có sản phẩm mới.
             </p>
           )}
         </div>
