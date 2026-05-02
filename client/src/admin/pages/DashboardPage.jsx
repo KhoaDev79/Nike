@@ -4,19 +4,25 @@ import { useNavigate } from 'react-router-dom';
 import { getAdminStatsAPI, getDetailedReportsAPI } from '../../api/orderApi';
 import toast from 'react-hot-toast';
 import AdminSidebar from '../components/AdminSidebar';
-
-const glass = { background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14 };
-const glassSm = { ...glass, borderRadius: 12, padding: '14px 16px' };
-const muted = 'rgba(255,255,255,0.35)';
-const hint = 'rgba(255,255,255,0.2)';
-const secondary = 'rgba(255,255,255,0.65)';
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const statusColors = {
-  pending: { label: 'Chờ xác nhận', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.2)', color: '#fbbf24' },
-  confirmed: { label: 'Đã xác nhận', bg: 'rgba(124,58,237,0.12)', border: 'rgba(124,58,237,0.2)', color: '#a78bfa' },
-  shipping: { label: 'Đang giao', bg: 'rgba(236,72,153,0.12)', border: 'rgba(236,72,153,0.2)', color: '#f472b6' },
-  delivered: { label: 'Đã giao', bg: 'rgba(13,148,136,0.12)', border: 'rgba(13,148,136,0.2)', color: '#2dd4bf' },
-  cancelled: { label: 'Đã hủy', bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.2)', color: '#f87171' },
+  pending: { label: 'Chờ xác nhận', bg: 'bg-[var(--color-warning-yellow)]', text: 'text-[var(--color-nike-black)]', border: 'border-[var(--color-nike-black)]' },
+  confirmed: { label: 'Đã xác nhận', bg: 'bg-[var(--color-light-gray)]', text: 'text-[var(--color-nike-black)]', border: 'border-[var(--color-border-secondary)]' },
+  shipping: { label: 'Đang giao', bg: 'bg-[var(--color-link-blue)]', text: 'text-[var(--color-nike-white)]', border: 'border-transparent' },
+  delivered: { label: 'Đã giao', bg: 'bg-[var(--color-success-green)]', text: 'text-[var(--color-nike-white)]', border: 'border-transparent' },
+  cancelled: { label: 'Đã hủy', bg: 'bg-[var(--color-nike-red)]', text: 'text-[var(--color-nike-white)]', border: 'border-transparent' },
+};
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-[var(--color-nike-black)] text-[var(--color-nike-white)] text-[12px] font-bold px-3 py-2 rounded-[6px] shadow-lg">
+        {payload[0].value.toLocaleString('vi-VN')}đ
+      </div>
+    );
+  }
+  return null;
 };
 
 export default function AdminDashboard() {
@@ -49,8 +55,8 @@ export default function AdminDashboard() {
   const dateStr = `${dayNames[today.getDay()]}, ${today.toLocaleDateString('vi-VN')}`;
 
   if (loading || !stats) return (
-    <div className='min-h-screen flex items-center justify-center' style={{ background: '#080b14', fontFamily: "'Inter',system-ui" }}>
-      <div className='w-8 h-8 border-2 border-[#7c3aed] border-t-transparent rounded-full animate-spin' />
+    <div className='min-h-screen flex items-center justify-center bg-[var(--color-light-gray)]'>
+      <div className='w-8 h-8 border-2 border-[var(--color-nike-black)] border-t-transparent rounded-full animate-spin' />
     </div>
   );
 
@@ -59,62 +65,53 @@ export default function AdminDashboard() {
   const todayRevenue = stats.chartData[stats.chartData.length - 1]?.revenue || 0;
 
   const kpis = [
-    { label: 'DOANH THU', value: stats.revenue.month.toLocaleString('vi-VN') + 'đ', accent: '#7c3aed' },
-    { label: 'CHỜ XỬ LÝ', value: stats.orders.pending, accent: '#f59e0b' },
-    { label: 'HOÀN TẤT', value: stats.orders.delivered, accent: '#0d9488' },
-    { label: 'KHÁCH HÀNG', value: stats.customers, accent: '#ec4899' },
+    { label: 'DOANH THU', value: stats.revenue.month.toLocaleString('vi-VN') + 'đ' },
+    { label: 'CHỜ XỬ LÝ', value: stats.orders.pending },
+    { label: 'HOÀN TẤT', value: stats.orders.delivered },
+    { label: 'KHÁCH HÀNG', value: stats.customers },
   ];
 
   return (
-    <div className='min-h-screen relative overflow-hidden' style={{ background: '#080b14', fontFamily: "'Inter',system-ui" }}>
-      {/* Orbs */}
-      <div className='fixed top-[-200px] left-[-200px] w-[600px] h-[600px] rounded-full pointer-events-none' style={{ background: 'rgba(124,58,237,0.12)', filter: 'blur(80px)' }} />
-      <div className='fixed bottom-[-200px] right-[-150px] w-[500px] h-[500px] rounded-full pointer-events-none' style={{ background: 'rgba(13,148,136,0.1)', filter: 'blur(80px)' }} />
-      <div className='fixed top-[40%] left-[50%] w-[300px] h-[300px] rounded-full pointer-events-none' style={{ background: 'rgba(124,58,237,0.06)', filter: 'blur(60px)' }} />
-
+    <div className='min-h-screen relative bg-[var(--color-light-gray)] text-[var(--color-text-primary)]'>
       <AdminSidebar stats={stats} />
 
       <main className='ml-[200px] p-6 lg:p-8 xl:p-10 relative z-10'>
         {/* Topbar */}
         <div className='flex items-center justify-between mb-6'>
           <div>
-            <h1 className='text-[18px] font-bold text-white' style={{ letterSpacing: '-0.03em' }}>Dashboard</h1>
-            <p className='text-[12px] mt-0.5' style={{ color: muted }}>{dateStr}</p>
+            <h1 className='text-[24px] font-bold tracking-tight'>Dashboard</h1>
+            <p className='text-[14px] text-[var(--color-text-secondary)] mt-0.5'>{dateStr}</p>
           </div>
-          <button className='w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-150' style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <svg className='w-4 h-4' fill='none' stroke='rgba(255,255,255,0.5)' strokeWidth='1.5' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'/></svg>
-          </button>
         </div>
 
         {/* Hero Row */}
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
           {/* Revenue Card */}
-          <div className='relative overflow-hidden' style={{ background: 'linear-gradient(135deg, rgba(109,40,217,0.3), rgba(13,148,136,0.15))', border: '1px solid rgba(124,58,237,0.25)', borderRadius: 14, padding: 20 }}>
-            <div className='absolute top-0 right-0 w-32 h-32 rounded-full pointer-events-none' style={{ background: 'rgba(167,139,250,0.15)', filter: 'blur(40px)' }} />
-            <p className='text-[10px] font-semibold uppercase tracking-[0.1em] mb-2' style={{ color: muted }}>DOANH THU · 30 NGÀY</p>
-            <p className='text-[28px] font-extrabold text-white mb-3' style={{ letterSpacing: '-0.04em', fontVariantNumeric: 'tabular-nums' }}>
+          <div className='bg-[var(--color-nike-black)] text-[var(--color-nike-white)] rounded-[20px] p-6 relative overflow-hidden'>
+            <p className='text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-2'>DOANH THU · 30 NGÀY</p>
+            <p className='text-[32px] font-black mb-3 tabular-nums'>
               {stats.revenue.month.toLocaleString('vi-VN')}đ
             </p>
-            <span className='inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full' style={{ background: 'rgba(13,148,136,0.15)', color: '#2dd4bf', border: '1px solid rgba(13,148,136,0.2)' }}>
+            <span className='inline-flex items-center gap-1 text-[11px] font-bold px-3 py-1.5 rounded-full bg-[var(--color-nike-white)] text-[var(--color-nike-black)]'>
               ↑ Doanh thu tháng này
             </span>
           </div>
           {/* Date & System */}
-          <div style={{ ...glass, padding: 20 }}>
-            <p className='text-[16px] font-bold text-white mb-1'>{dateStr}</p>
+          <div className='bg-[var(--color-nike-white)] rounded-[20px] p-6 border border-[var(--color-border-secondary)]'>
+            <p className='text-[16px] font-bold mb-1'>{dateStr}</p>
             <div className='flex items-center gap-2 mb-4'>
-              <div className='w-2 h-2 rounded-full bg-[#0d9488]' style={{ boxShadow: '0 0 6px #0d9488' }} />
-              <span className='text-[12px] font-medium' style={{ color: '#2dd4bf' }}>Hệ thống hoạt động ổn định</span>
+              <div className='w-2 h-2 rounded-full bg-[var(--color-success-green)]' />
+              <span className='text-[12px] font-medium text-[var(--color-text-secondary)]'>Hệ thống hoạt động ổn định</span>
             </div>
-            <div className='flex items-center gap-0 pt-3' style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className='flex items-center gap-0 pt-4 border-t border-[var(--color-border-secondary)]'>
               {[
                 { l: 'Đơn hôm nay', v: todayOrders },
                 { l: 'DT hôm nay', v: (todayRevenue / 1e6).toFixed(1) + 'M' },
                 { l: 'Khách hàng', v: stats.customers },
               ].map((s, i) => (
-                <div key={i} className='flex-1 text-center' style={i < 2 ? { borderRight: '1px solid rgba(255,255,255,0.06)' } : {}}>
-                  <p className='text-[9px] uppercase tracking-[0.08em] mb-0.5' style={{ color: muted }}>{s.l}</p>
-                  <p className='text-[14px] font-extrabold text-[#a78bfa]'>{s.v}</p>
+                <div key={i} className={`flex-1 text-center ${i < 2 ? 'border-r border-[var(--color-border-secondary)]' : ''}`}>
+                  <p className='text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-1'>{s.l}</p>
+                  <p className='text-[16px] font-black'>{s.v}</p>
                 </div>
               ))}
             </div>
@@ -122,17 +119,11 @@ export default function AdminDashboard() {
         </div>
 
         {/* KPI Row */}
-        <div className='grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4'>
+        <div className='grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4'>
           {kpis.map(k => (
-            <div key={k.label} className='transition-all duration-150 hover:border-white/10' style={glassSm}>
-              <div className='flex items-center justify-between mb-2'>
-                <p className='text-[10px] font-semibold uppercase tracking-[0.1em]' style={{ color: muted }}>{k.label}</p>
-                <div className='w-2 h-2 rounded-full' style={{ background: k.accent }} />
-              </div>
-              <p className='text-[22px] font-extrabold text-white mb-2' style={{ letterSpacing: '-0.04em', fontVariantNumeric: 'tabular-nums' }}>{k.value}</p>
-              <div className='w-full h-[3px] rounded-full overflow-hidden' style={{ background: 'rgba(255,255,255,0.05)' }}>
-                <div className='h-full rounded-full' style={{ width: '65%', background: `linear-gradient(90deg, ${k.accent}, ${k.accent}88)` }} />
-              </div>
+            <div key={k.label} className='bg-[var(--color-nike-white)] rounded-[20px] p-5 border border-[var(--color-border-secondary)]'>
+              <p className='text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-2'>{k.label}</p>
+              <p className='text-[24px] font-black tabular-nums'>{k.value}</p>
             </div>
           ))}
         </div>
@@ -140,16 +131,16 @@ export default function AdminDashboard() {
         {/* Content Row */}
         <div className='grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-4'>
           {/* Orders Table */}
-          <div style={{ ...glass, padding: 16 }}>
-            <div className='flex items-center justify-between mb-3'>
-              <p className='text-[10px] font-semibold uppercase tracking-[0.1em]' style={{ color: muted }}>ĐƠN HÀNG GẦN ĐÂY</p>
-              <button onClick={() => navigate('/admin/orders')} className='text-[10px] font-medium cursor-pointer hover:underline' style={{ color: '#a78bfa' }}>Xem tất cả →</button>
+          <div className='bg-[var(--color-nike-white)] rounded-[20px] p-6 border border-[var(--color-border-secondary)]'>
+            <div className='flex items-center justify-between mb-4'>
+              <p className='text-[12px] font-bold uppercase tracking-widest'>ĐƠN HÀNG GẦN ĐÂY</p>
+              <button onClick={() => navigate('/admin/orders')} className='text-[12px] font-bold underline hover:text-[var(--color-text-secondary)]'>Xem tất cả</button>
             </div>
             <table className='w-full'>
               <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <tr className='border-b border-[var(--color-border-secondary)]'>
                   {['MÃ ĐƠN','KHÁCH HÀNG','TRẠNG THÁI','GIÁ TRỊ'].map(h => (
-                    <th key={h} className={`pb-2 text-left text-[9px] font-medium uppercase tracking-[0.08em] ${h === 'GIÁ TRỊ' ? 'text-right' : ''}`} style={{ color: hint }}>{h}</th>
+                    <th key={h} className={`pb-3 text-left text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-secondary)] ${h === 'GIÁ TRỊ' ? 'text-right' : ''}`}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -157,16 +148,13 @@ export default function AdminDashboard() {
                 {stats.recentOrders.map(o => {
                   const st = statusColors[o.status] || statusColors.pending;
                   return (
-                    <tr key={o.id} className='cursor-pointer transition-colors duration-150' style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }} onClick={() => setSelectedOrder(o)}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                    >
-                      <td className='py-2'><span className='text-[11px] font-bold' style={{ color: '#818cf8', fontFamily: "'JetBrains Mono',monospace" }}>#{o.id.slice(-6).toUpperCase()}</span></td>
-                      <td className='py-2 text-[11px]' style={{ color: secondary }}>{o.customer}</td>
-                      <td className='py-2'>
-                        <span className='text-[9px] font-semibold px-2 py-0.5 rounded-full inline-block' style={{ background: st.bg, color: st.color, border: `1px solid ${st.border}` }}>{st.label}</span>
+                    <tr key={o.id} className='cursor-pointer border-b border-[var(--color-border-secondary)] hover:bg-[var(--color-hover-gray)] transition-colors' onClick={() => setSelectedOrder(o)}>
+                      <td className='py-3'><span className='text-[12px] font-bold'>#{o.id.slice(-6).toUpperCase()}</span></td>
+                      <td className='py-3 text-[12px] text-[var(--color-text-secondary)]'>{o.customer}</td>
+                      <td className='py-3'>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${st.bg} ${st.text} ${st.border}`}>{st.label}</span>
                       </td>
-                      <td className='py-2 text-right text-[11px] font-bold text-white' style={{ fontVariantNumeric: 'tabular-nums' }}>{o.total.toLocaleString('vi-VN')}đ</td>
+                      <td className='py-3 text-right text-[12px] font-bold tabular-nums'>{o.total.toLocaleString('vi-VN')}đ</td>
                     </tr>
                   );
                 })}
@@ -177,48 +165,44 @@ export default function AdminDashboard() {
           {/* Right Column */}
           <div className='space-y-4'>
             {/* Chart */}
-            <div style={{ ...glass, padding: 16 }}>
-              <p className='text-[10px] font-semibold uppercase tracking-[0.1em] mb-4' style={{ color: muted }}>BIỂU ĐỒ DOANH THU · 30 NGÀY</p>
-              <div className='h-[120px] flex items-end gap-[2px]'>
-                {stats.chartData.map((d, i) => {
-                  const h = Math.max((d.revenue / maxRev) * 100, 4);
-                  const isMax = d.revenue === maxRev && d.revenue > 0;
-                  const dayNum = d._id.split('-')[2];
-                  return (
-                    <div key={i} className='flex-1 h-full flex flex-col justify-end group relative'>
-                      <div className='w-full rounded-t-sm transition-all duration-200 cursor-pointer' style={{
-                        height: `${h}%`,
-                        background: isMax ? 'linear-gradient(to top, #a78bfa, #2dd4bf)' : d.revenue > 0 ? 'rgba(167,139,250,0.25)' : 'rgba(167,139,250,0.06)',
-                      }}>
-                        <div className='absolute -top-7 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded text-[8px] font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none' style={{ background: 'rgba(0,0,0,0.8)' }}>
-                          {d.revenue.toLocaleString('vi-VN')}đ
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+            <div className='bg-[var(--color-nike-white)] rounded-[20px] p-6 border border-[var(--color-border-secondary)]'>
+              <p className='text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-6'>BIỂU ĐỒ DOANH THU · 30 NGÀY</p>
+              <div className='h-[140px]'>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                    <XAxis 
+                      dataKey="_id" 
+                      tickFormatter={(val) => {
+                        const dayNum = parseInt(val.split('-')[2]);
+                        return dayNum === 1 || dayNum % 5 === 0 ? dayNum : '';
+                      }} 
+                      tick={{fontSize: 10, fontWeight: 'bold', fill: 'var(--color-text-secondary)'}}
+                      axisLine={false} 
+                      tickLine={false}
+                      dy={10}
+                    />
+                    <Tooltip content={<CustomTooltip />} cursor={{fill: 'var(--color-light-gray)'}} />
+                    <Bar dataKey="revenue" radius={[2, 2, 0, 0]}>
+                      {stats.chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.revenue === maxRev && entry.revenue > 0 ? 'var(--color-nike-black)' : entry.revenue > 0 ? 'var(--color-border-secondary)' : 'var(--color-light-gray)'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-              {/* Day labels */}
-              <div className='flex gap-[2px] mt-1'>
-                {stats.chartData.map((d, i) => {
-                  const dayNum = parseInt(d._id.split('-')[2]);
-                  const show = dayNum === 1 || dayNum % 5 === 0 || i === stats.chartData.length - 1;
-                  return <div key={i} className='flex-1 text-center text-[7px] font-medium' style={{ color: show ? 'rgba(255,255,255,0.25)' : 'transparent' }}>{dayNum}</div>;
-                })}
-              </div>
-              <div className='mt-3 pt-3 flex items-center justify-between' style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                <span className='text-[10px] font-medium' style={{ color: muted }}>Doanh thu tháng</span>
-                <span className='text-[12px] font-bold' style={{ color: '#2dd4bf', fontVariantNumeric: 'tabular-nums' }}>{stats.revenue.month.toLocaleString('vi-VN')}đ</span>
+              <div className='mt-4 pt-4 flex items-center justify-between border-t border-[var(--color-border-secondary)]'>
+                <span className='text-[12px] font-bold text-[var(--color-text-secondary)]'>Doanh thu tháng</span>
+                <span className='text-[14px] font-black tabular-nums'>{stats.revenue.month.toLocaleString('vi-VN')}đ</span>
               </div>
             </div>
 
             {/* CTA */}
-            <div className='cursor-pointer group' style={{ background: 'linear-gradient(135deg, rgba(109,40,217,0.4), rgba(13,148,136,0.25))', border: '1px solid rgba(124,58,237,0.25)', borderRadius: 14, padding: 16 }} onClick={() => navigate('/admin/reports')}>
-              <p className='text-[10px] font-semibold uppercase tracking-[0.1em] mb-1' style={{ color: muted }}>BÁO CÁO CHI TIẾT</p>
-              <p className='text-[13px] font-bold text-white mb-3'>Xem phân tích chuyên sâu về doanh thu</p>
-              <span className='text-[11px] font-medium inline-flex items-center gap-1.5 group-hover:underline' style={{ color: '#a78bfa' }}>
+            <div className='cursor-pointer group bg-[var(--color-nike-black)] text-[var(--color-nike-white)] rounded-[20px] p-6' onClick={() => navigate('/admin/reports')}>
+              <p className='text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-2'>BÁO CÁO CHI TIẾT</p>
+              <p className='text-[16px] font-bold mb-4'>Xem phân tích chuyên sâu về doanh thu</p>
+              <span className='text-[12px] font-bold inline-flex items-center gap-1.5 group-hover:underline'>
                 Khám phá ngay
-                <svg className='w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M17 8l4 4m0 0l-4 4m4-4H3'/></svg>
+                <svg className='w-4 h-4 group-hover:translate-x-1 transition-transform' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M17 8l4 4m0 0l-4 4m4-4H3'/></svg>
               </span>
             </div>
           </div>
@@ -227,50 +211,50 @@ export default function AdminDashboard() {
 
       {/* Modal */}
       {selectedOrder && (
-        <div className='fixed inset-0 z-[100] flex items-center justify-center p-4' style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
-          <div className='w-full max-w-2xl rounded-2xl overflow-hidden' style={{ background: 'rgba(15,20,35,0.95)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className='px-6 py-4 flex items-center justify-between' style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className='fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[var(--color-nike-black)]/40 backdrop-blur-sm'>
+          <div className='w-full max-w-2xl bg-[var(--color-nike-white)] rounded-[20px] overflow-hidden'>
+            <div className='px-6 py-4 flex items-center justify-between border-b border-[var(--color-border-secondary)]'>
               <div>
-                <h2 className='text-[16px] font-bold text-white'>Đơn hàng <span style={{ color: '#818cf8', fontFamily: "'JetBrains Mono',monospace" }}>#{selectedOrder.id.slice(-6).toUpperCase()}</span></h2>
-                <p className='text-[11px] mt-0.5' style={{ color: muted }}>{new Date(selectedOrder.date).toLocaleDateString('vi-VN')}</p>
+                <h2 className='text-[18px] font-bold'>Đơn hàng <span className='font-mono'>#{selectedOrder.id.slice(-6).toUpperCase()}</span></h2>
+                <p className='text-[12px] text-[var(--color-text-secondary)] mt-0.5'>{new Date(selectedOrder.date).toLocaleDateString('vi-VN')}</p>
               </div>
-              <button onClick={() => setSelectedOrder(null)} className='w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer' style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <svg className='w-4 h-4' fill='none' stroke='rgba(255,255,255,0.5)' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12'/></svg>
+              <button onClick={() => setSelectedOrder(null)} className='w-10 h-10 rounded-full bg-[var(--color-light-gray)] hover:bg-[var(--color-hover-gray)] flex items-center justify-center cursor-pointer transition-colors'>
+                <svg className='w-5 h-5' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12'/></svg>
               </button>
             </div>
             <div className='p-6 space-y-4 max-h-[60vh] overflow-y-auto'>
               {selectedOrder.items.map((item, i) => (
-                <div key={i} className='flex items-center gap-4 py-2' style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                  <div className='w-12 h-12 rounded-lg overflow-hidden shrink-0 p-1 flex items-center justify-center' style={{ background: 'rgba(255,255,255,0.05)' }}>
-                    <img src={item.image} alt={item.name} className='w-full h-full object-contain' />
+                <div key={i} className='flex items-center gap-4 py-3 border-b border-[var(--color-border-secondary)]'>
+                  <div className='w-16 h-16 bg-[var(--color-light-gray)] shrink-0 p-2 flex items-center justify-center'>
+                    <img src={item.image} alt={item.name} className='w-full h-full object-contain mix-blend-multiply' />
                   </div>
                   <div className='flex-1 min-w-0'>
-                    <p className='text-[12px] font-medium text-white truncate'>{item.name}</p>
-                    <p className='text-[10px]' style={{ color: muted }}>SL: {item.quantity}</p>
+                    <p className='text-[14px] font-bold truncate'>{item.name}</p>
+                    <p className='text-[12px] text-[var(--color-text-secondary)]'>SL: {item.quantity}</p>
                   </div>
-                  <p className='text-[12px] font-bold text-white'>{(item.price * item.quantity).toLocaleString('vi-VN')}đ</p>
+                  <p className='text-[14px] font-bold'>{(item.price * item.quantity).toLocaleString('vi-VN')}đ</p>
                 </div>
               ))}
-              <div className='grid grid-cols-2 gap-3 pt-2'>
-                <div className='rounded-xl p-4' style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <p className='text-[9px] font-semibold uppercase tracking-[0.1em] mb-2' style={{ color: muted }}>Khách hàng</p>
-                  <p className='text-[13px] font-semibold text-white'>{selectedOrder.shippingInfo?.fullName || selectedOrder.customer}</p>
-                  <p className='text-[11px] mt-1' style={{ color: secondary }}>{selectedOrder.shippingInfo?.phone || 'N/A'}</p>
+              <div className='grid grid-cols-2 gap-4 pt-4'>
+                <div className='bg-[var(--color-snow)] p-5 border border-[var(--color-border-secondary)] rounded-[12px]'>
+                  <p className='text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-2'>Khách hàng</p>
+                  <p className='text-[14px] font-bold'>{selectedOrder.shippingInfo?.fullName || selectedOrder.customer}</p>
+                  <p className='text-[12px] text-[var(--color-text-secondary)] mt-1'>{selectedOrder.shippingInfo?.phone || 'N/A'}</p>
                   {selectedOrder.shippingInfo && (
-                    <p className='text-[10px] mt-1.5 leading-relaxed' style={{ color: muted }}>
+                    <p className='text-[12px] text-[var(--color-text-secondary)] mt-2 leading-relaxed'>
                       {selectedOrder.shippingInfo.street}, {selectedOrder.shippingInfo.ward}, {selectedOrder.shippingInfo.district}, {selectedOrder.shippingInfo.city}
                     </p>
                   )}
                 </div>
-                <div className='rounded-xl p-4' style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <p className='text-[9px] font-semibold uppercase tracking-[0.1em] mb-2' style={{ color: muted }}>Thanh toán</p>
-                  <p className='text-[13px] font-semibold text-white'>{selectedOrder.paymentMethod === 'cod' ? 'COD' : 'Online'}</p>
+                <div className='bg-[var(--color-snow)] p-5 border border-[var(--color-border-secondary)] rounded-[12px]'>
+                  <p className='text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-2'>Thanh toán</p>
+                  <p className='text-[14px] font-bold'>{selectedOrder.paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng (COD)' : 'Thanh toán Online'}</p>
                 </div>
               </div>
             </div>
-            <div className='px-6 py-4 flex items-center justify-between' style={{ background: 'linear-gradient(135deg, rgba(109,40,217,0.3), rgba(13,148,136,0.15))', borderTop: '1px solid rgba(124,58,237,0.2)' }}>
-              <p className='text-[10px] font-semibold uppercase tracking-[0.1em]' style={{ color: 'rgba(255,255,255,0.4)' }}>Tổng thanh toán</p>
-              <p className='text-[24px] font-extrabold text-white' style={{ letterSpacing: '-0.04em', fontVariantNumeric: 'tabular-nums' }}>{selectedOrder.total.toLocaleString('vi-VN')}đ</p>
+            <div className='px-6 py-5 bg-[var(--color-snow)] flex items-center justify-between border-t border-[var(--color-border-secondary)]'>
+              <p className='text-[12px] font-bold uppercase tracking-widest'>Tổng thanh toán</p>
+              <p className='text-[24px] font-black tabular-nums'>{selectedOrder.total.toLocaleString('vi-VN')}đ</p>
             </div>
           </div>
         </div>
@@ -278,3 +262,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+

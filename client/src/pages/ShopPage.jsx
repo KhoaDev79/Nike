@@ -13,6 +13,7 @@ const DEFAULT_FILTERS = {
   maxPrice: '',
   sort: '-createdAt',
   search: '',
+  featured: false,
 };
 
 export default function ShopPage() {
@@ -33,6 +34,7 @@ export default function ShopPage() {
     category: searchParams.get('category')
       ? [searchParams.get('category')]
       : [],
+    featured: searchParams.get('featured') === 'true',
   });
 
   // Sync filters whenever URL search params change (e.g., clicking Header menu while already on /shop)
@@ -47,6 +49,7 @@ export default function ShopPage() {
       category: searchParams.get('category')
         ? [searchParams.get('category')]
         : [],
+      featured: searchParams.get('featured') === 'true',
     });
     setPage(1);
   }, [searchParams]);
@@ -98,7 +101,10 @@ export default function ShopPage() {
   };
 
   const handleReset = () => {
-    setFilters(DEFAULT_FILTERS);
+    setFilters({
+      ...DEFAULT_FILTERS,
+      featured: searchParams.get('featured') === 'true',
+    });
     setPage(1);
   };
 
@@ -114,7 +120,7 @@ export default function ShopPage() {
 
         <div className='relative z-10 max-w-[1400px] mx-auto flex flex-col items-center text-center'>
           <h1 className='text-5xl md:text-7xl font-black uppercase tracking-tighter mb-6 text-white drop-shadow-xl'>
-            Trang bị bóng đá
+            {filters.featured ? 'Bộ Sưu Tập Nổi Bật' : 'Trang Bị Bóng Đá'}
           </h1>
           <p className='text-zinc-200 text-lg md:text-xl font-medium max-w-2xl drop-shadow-md'>
             Khám phá {pagination.total ?? '...'} sản phẩm đẳng cấp

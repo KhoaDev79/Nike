@@ -73,8 +73,7 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className='relative h-[90vh] min-h-[600px] flex items-center overflow-hidden bg-black'>
+      <section className='relative h-screen min-h-[700px] flex items-center overflow-hidden bg-black'>
         {/* Animated Background Images */}
         {heroSlides.map((slide, index) => (
           <div
@@ -115,7 +114,7 @@ export default function HomePage() {
           </button>
         </div>
 
-        <div className='relative z-10 max-w-7xl mx-auto px-6 w-full'>
+        <div className='relative z-10 max-w-[1400px] mx-auto px-6 w-full mt-24 md:mt-32'>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentHeroImg}
@@ -175,7 +174,7 @@ export default function HomePage() {
 
       {/* ── DYNAMIC CATEGORIES (ACCORDION STYLE) ──────────────── */}
       <section className='py-32 bg-black overflow-hidden'>
-        <div className='max-w-[1600px] mx-auto px-6 mb-16'>
+        <div className='max-w-[1400px] mx-auto px-6 mb-16'>
           <ScrollReveal>
             <div className='flex flex-col md:flex-row md:items-end justify-between gap-8'>
               <div className='max-w-2xl'>
@@ -195,26 +194,27 @@ export default function HomePage() {
           </ScrollReveal>
         </div>
 
-        <div className='flex flex-col md:flex-row h-[700px] w-full gap-2 px-2'>
+        <div className='max-w-[1400px] mx-auto px-6'>
+          <div className='flex flex-col md:flex-row h-[700px] w-full gap-4'>
           {[
-            { 
-              label: 'Sân cỏ tự nhiên', 
-              code: 'FG', 
-              img: catFg, 
+            {
+              label: 'Sân cỏ tự nhiên',
+              code: 'FG',
+              img: catFg,
               desc: 'Tối ưu độ bám cho các mặt sân cỏ mềm và khô.' ,
               features: ['Đinh cao', 'Trọng lượng nhẹ', 'Độ bám tối đa']
             },
-            { 
-              label: 'Sân nhân tạo', 
-              code: 'AG', 
-              img: catAg, 
+            {
+              label: 'Sân nhân tạo',
+              code: 'AG',
+              img: catAg,
               desc: 'Thiết kế đa năng cho các loại cỏ nhân tạo hiện đại.',
               features: ['Đinh tròn', 'Giảm chấn tốt', 'Bền bỉ']
             },
-            { 
-              label: 'Sân cứng / Futsal', 
-              code: 'TF', 
-              img: catTf, 
+            {
+              label: 'Sân cứng / Futsal',
+              code: 'TF',
+              img: catTf,
               desc: 'Duy trì tốc độ và sự ổn định trên mặt sân bê tông hoặc cỏ lùn.',
               features: ['Đinh dăm', 'Đệm cao su', 'Kiểm soát bóng']
             },
@@ -230,7 +230,7 @@ export default function HomePage() {
                 alt={cat.label}
                 className='absolute inset-0 w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 grayscale group-hover:grayscale-0'
               />
-              
+
               {/* Overlays */}
               <div className='absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/90 opacity-80 group-hover:opacity-100' />
               <div className='absolute inset-0 border-r border-white/5 last:border-0' />
@@ -254,7 +254,7 @@ export default function HomePage() {
                   <p className='text-zinc-300 text-lg font-medium mb-8'>
                     {cat.desc}
                   </p>
-                  
+
                   <div className='flex flex-wrap gap-3 mb-10'>
                     {cat.features.map(f => (
                       <span key={f} className='px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-white text-xs font-bold'>
@@ -278,6 +278,7 @@ export default function HomePage() {
               </div>
             </Link>
           ))}
+          </div>
         </div>
       </section>
 
@@ -364,10 +365,10 @@ export default function HomePage() {
                 >
                   {/* Background Image Container */}
                   <div className='absolute inset-0 z-0'>
-                    <img 
-                      src={t.bgImg} 
-                      alt={t.tier} 
-                      className='w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110' 
+                    <img
+                      src={t.bgImg}
+                      alt={t.tier}
+                      className='w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110'
                     />
                     <div className='absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/90'></div>
                     <div className='absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500'></div>

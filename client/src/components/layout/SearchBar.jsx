@@ -1,11 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import useSearch from '../../hooks/useSearch';
 import useClickOutside from '../../hooks/useClickOutside';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { Search as SearchIcon, X } from 'lucide-react';
 
 export default function SearchBar() {
   const navigate = useNavigate();
   const searchRef = useRef(null);
+  const inputRef = useRef(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const {
     search,
     setSearch,
@@ -16,42 +19,73 @@ export default function SearchBar() {
     clearSearch,
   } = useSearch();
 
-  useClickOutside(searchRef, () => setShowDropdown(false));
+  useClickOutside(searchRef, () => {
+    setShowDropdown(false);
+    if (!search) setIsExpanded(false);
+  });
 
   const handleSelectSuggestion = (slug) => {
     navigate(`/product/${slug}`);
     clearSearch();
+    setIsExpanded(false);
   };
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' && search.trim()) {
       navigate(`/shop?search=${encodeURIComponent(search.trim())}`);
       clearSearch();
+      setIsExpanded(false);
     }
   };
 
+  const toggleSearch = () => {
+    setIsExpanded(true);
+    setTimeout(() => inputRef.current?.focus(), 100);
+  };
+
   return (
-    <div ref={searchRef} className='relative shrink-0'>
-      <input
-        type='text'
-        placeholder='Tìm kiếm...'
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        onFocus={() => setShowDropdown(true)}
-        onClick={() => setShowDropdown(true)}
-        onKeyDown={handleSearch}
-        className='w-28 sm:w-36 md:w-40 focus:w-48 transition-all duration-300 bg-zinc-800/40 hover:bg-zinc-800/70 border border-white/5 hover:border-white/10 text-white placeholder-zinc-500 rounded-full px-4 py-1.5 pl-8 text-xs focus:ring-1 focus:ring-white focus:outline-none focus:bg-zinc-800/80 h-9 shadow-inner select-text'
-      />
-      <svg
-        className='absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 opacity-60 text-zinc-400 pointer-events-none'
-        fill='none'
-        stroke='currentColor'
-        strokeWidth='2'
-        viewBox='0 0 24 24'
+    <div ref={searchRef} className='relative shrink-0 flex items-center'>
+      <div
+        className={`relative flex items-center overflow-hidden transition-all duration-500 ease-out border ${
+          isExpanded
+            ? 'w-64 bg-zinc-800/80 border-white/20 px-4 h-10 rounded-full shadow-inner'
+            : 'w-10 h-10 bg-transparent hover:bg-zinc-800/40 border-transparent rounded-full cursor-pointer justify-center'
+        }`}
+        onClick={!isExpanded ? toggleSearch : undefined}
       >
-        <circle cx='11' cy='11' r='8' />
-        <path d='m21 21-4.35-4.35' />
-      </svg>
+        <SearchIcon
+          className={`shrink-0 transition-colors duration-300 ${
+            isExpanded ? 'text-zinc-400 mr-3 w-4 h-4' : 'text-white w-5 h-5'
+          }`}
+          strokeWidth={isExpanded ? 2.5 : 2}
+        />
+
+        <input
+          ref={inputRef}
+          type='text'
+          placeholder='Tìm kiếm sản phẩm...'
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onFocus={() => setShowDropdown(true)}
+          onKeyDown={handleSearch}
+          className={`bg-transparent text-white placeholder-zinc-500 text-sm focus:outline-none w-full transition-all duration-300 ${
+            isExpanded ? 'opacity-100' : 'opacity-0 w-0'
+          }`}
+        />
+        
+        {isExpanded && search && (
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setSearch('');
+              inputRef.current?.focus();
+            }}
+            className='text-zinc-400 hover:text-white shrink-0 ml-2 p-1 rounded-full hover:bg-zinc-700/50 transition-colors'
+          >
+             <X className='w-4 h-4' strokeWidth={2.5} />
+          </button>
+        )}
+      </div>
 
       {/* Autocomplete Dropdown */}
       {showDropdown && search.trim() !== '' && (

@@ -3,14 +3,12 @@ import { Link } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import ProductCard from '../components/ProductCard';
 import { getMeAPI } from '../api/authApi';
+import heroBg from '../assets/anhmoi2.jpg';
 
 export default function WishlistPage() {
   const { user, toggleWishlist, fetchMe } = useAuthStore();
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Background image path (absolute path as required for embedding)
-  const heroBg = '/C:/Users/DELL/.gemini/antigravity/brain/c4d0bea5-9922-4b6c-ae73-8c8188aabd32/wishlist_hero_bg_1777480651018.png';
 
   useEffect(() => {
     const loadWishlist = async () => {
@@ -69,8 +67,8 @@ export default function WishlistPage() {
         />
         <div className='absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent' />
 
-        <div className='max-w-7xl mx-auto px-6 w-full relative z-10'>
-          <div className='flex flex-col items-start'>
+        <div className='max-w-[1400px] mx-auto px-6 w-full relative z-10'>
+          <div className='flex flex-col items-start mt-20'>
             <span className='inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-[0.3em] mb-6'>
                 Collection
             </span>
@@ -89,7 +87,7 @@ export default function WishlistPage() {
         </div>
       </div>
 
-      <div className='max-w-7xl mx-auto px-6 py-20'>
+      <div className='max-w-[1400px] mx-auto px-6 py-20'>
         {/* Header with count */}
         <div className='flex items-center justify-between mb-16 pb-6 border-b border-zinc-100'>
             <div>
@@ -140,7 +138,7 @@ export default function WishlistPage() {
       </div>
 
       {/* Bottom Banner */}
-      <div className='max-w-7xl mx-auto px-6 pb-20'>
+      <div className='max-w-[1400px] mx-auto px-6 pb-20'>
         <div className='bg-zinc-950 rounded-[3rem] p-12 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8'>
             <div className='relative z-10'>
                 <h3 className='text-white text-3xl font-black uppercase tracking-tighter mb-2'>Thành viên Nike</h3>

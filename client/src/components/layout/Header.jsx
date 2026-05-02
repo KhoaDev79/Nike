@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import SearchBar from './SearchBar';
 import UserMenu from './UserMenu';
 import CartButton from './CartButton';
@@ -9,8 +9,18 @@ import CartDrawer from './CartDrawer';
 
 export default function Header() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Listen for global open-cart event
   useEffect(() => {
@@ -29,10 +39,20 @@ export default function Header() {
     }
   };
 
+  const isHomeOrShop = location.pathname === '/' || location.pathname === '/shop';
+
   return (
     <>
-      <header className={`fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-6xl bg-zinc-900/60 backdrop-blur-xl text-white border border-white/10 z-50 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] transition-all duration-300 ${menuOpen ? 'rounded-[28px]' : 'rounded-full'}`}>
-        <div className='px-6 py-2 flex items-center justify-between gap-4 h-16'>
+      <header 
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 border-b ${
+          scrolled 
+            ? 'bg-zinc-950/95 backdrop-blur-3xl shadow-xl border-white/10 py-0' 
+            : isHomeOrShop 
+              ? 'bg-transparent border-transparent py-2' 
+              : 'bg-zinc-950/80 backdrop-blur-2xl border-white/5 py-1'
+        } text-white`}
+      >
+        <div className={`max-w-[1600px] mx-auto px-6 flex items-center justify-between gap-4 transition-all duration-500 ${scrolled ? 'h-16' : 'h-20'}`}>
           {/* Logo */}
           <Link to='/' onClick={handleGoHome} className='flex items-center gap-2 shrink-0'>
             <svg className='w-9 h-9 fill-white hover:opacity-80 transition' viewBox='0 0 192.756 192.756' xmlns='http://www.w3.org/2000/svg'>

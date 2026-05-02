@@ -14,7 +14,7 @@ import toast from 'react-hot-toast';
 export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { addItem } = useCartStore();
+  const { addItem, items } = useCartStore();
   const { user, toggleWishlist } = useAuthStore();
   const [product, setProduct] = useState(null);
   const isWishlisted = user?.wishlist?.some(id => (typeof id === 'string' ? id : id._id) === product?._id);
@@ -49,6 +49,17 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!size) return toast.error('Vui lòng chọn size!');
+    
+    const selectedStock = product.sizes.find(s => s.size === size)?.stock || 0;
+    const existingItem = items?.find(i => i._id === product._id && i.selectedSize === size);
+    const existingQty = existingItem ? existingItem.quantity : 0;
+    
+    if (existingQty + qty > selectedStock) {
+      return toast.error(existingQty > 0 
+        ? `Không thể thêm! Số lượng vượt quá tồn kho (bạn đã có ${existingQty} đôi trong giỏ).` 
+        : 'Rất tiếc, số lượng sản phẩm vượt quá tồn kho hiện tại.');
+    }
+
     addItem({ ...product, selectedSize: size }, qty);
     setShowCartModal(true);
   };
@@ -65,6 +76,17 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     if (!size) return toast.error('Vui lòng chọn size!');
+    
+    const selectedStock = product.sizes.find(s => s.size === size)?.stock || 0;
+    const existingItem = items?.find(i => i._id === product._id && i.selectedSize === size);
+    const existingQty = existingItem ? existingItem.quantity : 0;
+    
+    if (existingQty + qty > selectedStock) {
+      return toast.error(existingQty > 0 
+        ? `Không thể thanh toán! Số lượng vượt quá tồn kho (bạn đã có ${existingQty} đôi trong giỏ).` 
+        : 'Rất tiếc, số lượng sản phẩm vượt quá tồn kho hiện tại.');
+    }
+
     addItem({ ...product, selectedSize: size }, qty);
     navigate('/checkout');
   };
@@ -210,7 +232,13 @@ export default function ProductDetail() {
               <SizeSelector
                 sizes={displaySizes}
                 selected={size}
-                onChange={setSize}
+                onChange={(newSize) => {
+                  setSize(newSize);
+                  const selectedStock = product.sizes.find(s => s.size === newSize)?.stock || 0;
+                  if (qty > selectedStock) {
+                    setQty(selectedStock > 0 ? selectedStock : 1);
+                  }
+                }}
               />
             </div>
 
@@ -228,7 +256,15 @@ export default function ProductDetail() {
                   {qty}
                 </span>
                 <button
-                  onClick={() => setQty((q) => q + 1)}
+                  onClick={() => {
+                    if (!size) return toast.error('Vui lòng chọn size trước!');
+                    const selectedStock = product.sizes.find(s => s.size === size)?.stock || 0;
+                    if (qty >= selectedStock) {
+                      toast.error('Rất tiếc, số lượng sản phẩm vượt quá giới hạn tồn kho hiện tại!');
+                      return;
+                    }
+                    setQty((q) => q + 1);
+                  }}
                   className='w-9 h-9 flex items-center justify-center text-lg hover:bg-zinc-100 transition'
                 >
                   +

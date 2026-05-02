@@ -15,64 +15,52 @@ export default function AdminSidebar({ stats }) {
   ];
 
   return (
-    <aside
-      className='w-[200px] hidden lg:flex flex-col fixed left-0 top-0 h-screen z-50'
-      style={{
-        background: 'rgba(255,255,255,0.03)',
-        borderRight: '1px solid rgba(255,255,255,0.06)',
-        fontFamily: "'Inter', system-ui, sans-serif",
-      }}
-    >
+    <aside className='w-[200px] hidden lg:flex flex-col fixed left-0 top-0 h-screen z-50 bg-[var(--color-snow)] border-r border-[var(--color-border-secondary)]'>
       {/* User Profile */}
-      <div className='px-4 py-5 flex items-center gap-3' style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div
-          className='w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0'
-          style={{ background: 'linear-gradient(135deg, #7c3aed, #0d9488)' }}
-        >
+      <div className='px-4 py-5 flex items-center gap-3 border-b border-[var(--color-border-secondary)]'>
+        <div className='w-9 h-9 rounded-full flex items-center justify-center text-[var(--color-nike-white)] bg-[var(--color-nike-black)] font-bold text-sm shrink-0'>
           {user?.name?.charAt(0)?.toUpperCase() || 'A'}
         </div>
         <div className='min-w-0'>
-          <p className='text-[12px] font-semibold text-white truncate leading-tight'>{user?.name}</p>
-          <p className='text-[10px]' style={{ color: 'rgba(255,255,255,0.3)' }}>Admin</p>
+          <p className='text-[12px] font-semibold text-[var(--color-text-primary)] truncate leading-tight'>{user?.name}</p>
+          <p className='text-[10px] text-[var(--color-text-secondary)]'>Admin</p>
         </div>
       </div>
 
       {/* Nav Label */}
       <div className='px-4 pt-5 pb-2'>
-        <p className='text-[9px] font-semibold uppercase tracking-[0.12em]' style={{ color: 'rgba(255,255,255,0.2)' }}>Menu</p>
+        <p className='text-[9px] font-bold uppercase tracking-widest text-[var(--color-text-secondary)]'>Menu</p>
       </div>
 
       {/* Navigation */}
-      <nav className='flex-1 px-3 space-y-0.5'>
+      <nav className='flex-1 px-3 space-y-1'>
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <button
               key={item.label}
               onClick={() => navigate(item.path)}
-              className='relative w-full flex items-center gap-3 h-[40px] px-3 rounded-lg transition-all duration-150 cursor-pointer'
-              style={{
-                background: isActive ? 'rgba(124,58,237,0.25)' : 'transparent',
-                border: isActive ? '1px solid rgba(124,58,237,0.4)' : '1px solid transparent',
-              }}
-              onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-              onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+              className={`relative w-full flex items-center gap-3 h-[40px] px-3 rounded-lg transition-colors duration-150 cursor-pointer ${
+                isActive 
+                  ? 'bg-[var(--color-nike-black)] text-[var(--color-nike-white)]' 
+                  : 'bg-transparent text-[var(--color-text-primary)] hover:bg-[var(--color-hover-gray)]'
+              }`}
             >
               <svg
                 className='w-[16px] h-[16px] shrink-0'
                 fill='none'
-                stroke={isActive ? '#a78bfa' : 'rgba(255,255,255,0.35)'}
-                strokeWidth='1.5'
+                stroke='currentColor'
+                strokeWidth='2'
                 viewBox='0 0 24 24'
               >
                 <path strokeLinecap='round' strokeLinejoin='round' d={item.icon} />
               </svg>
-              <span className='text-[12px] font-medium' style={{ color: isActive ? '#a78bfa' : 'rgba(255,255,255,0.55)' }}>
+              <span className='text-[12px] font-medium'>
                 {item.label}
               </span>
               {item.badge > 0 && (
-                <div className='ml-auto w-[18px] h-[18px] rounded-md bg-[#ef4444] flex items-center justify-center'>
-                  <span className='text-[9px] font-bold text-white'>{item.badge}</span>
+                <div className='ml-auto w-[18px] h-[18px] rounded-full bg-[var(--color-nike-red)] flex items-center justify-center'>
+                  <span className='text-[9px] font-bold text-[var(--color-nike-white)]'>{item.badge}</span>
                 </div>
               )}
             </button>
@@ -81,15 +69,12 @@ export default function AdminSidebar({ stats }) {
       </nav>
 
       {/* Footer */}
-      <div className='px-3 py-4' style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className='px-3 py-4 border-t border-[var(--color-border-secondary)]'>
         <button
           onClick={() => navigate('/shop')}
-          className='w-full flex items-center gap-3 h-[40px] px-3 rounded-lg transition-all duration-150 cursor-pointer'
-          style={{ color: '#2dd4bf' }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(13,148,136,0.1)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          className='w-full flex items-center gap-3 h-[40px] px-3 rounded-lg transition-colors duration-150 cursor-pointer bg-transparent text-[var(--color-text-primary)] hover:bg-[var(--color-hover-gray)]'
         >
-          <svg className='w-[16px] h-[16px]' fill='none' stroke='currentColor' strokeWidth='1.5' viewBox='0 0 24 24'>
+          <svg className='w-[16px] h-[16px]' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
             <path strokeLinecap='round' strokeLinejoin='round' d='M10 19l-7-7m0 0l7-7m-7 7h18'/>
           </svg>
           <span className='text-[12px] font-medium'>Về cửa hàng</span>
