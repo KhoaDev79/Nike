@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import useAuthStore from '../store/useAuthStore';
+import useAuthStore from '../../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
-import { getAllOrdersAPI, updateOrderStatusAPI, getAdminStatsAPI } from '../services/orderService';
+import { getAllOrdersAPI, updateOrderStatusAPI, getAdminStatsAPI } from '../../api/orderApi';
 import toast from 'react-hot-toast';
 import AdminSidebar from '../components/AdminSidebar';
 

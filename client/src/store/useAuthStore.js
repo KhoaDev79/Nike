@@ -7,7 +7,7 @@ import {
   getMeAPI,
   updateMeAPI,
   toggleWishlistAPI,
-} from '../services/authService';
+} from '../api/authApi';
 
 const useAuthStore = create(
   persist(

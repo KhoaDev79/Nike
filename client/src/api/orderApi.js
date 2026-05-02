@@ -1,4 +1,4 @@
-import api from './api';
+import api from './axiosClient';
 
 export const createOrderAPI = (payload) => api.post('/orders', payload);
 export const getMyOrdersAPI = () => api.get('/orders/my');

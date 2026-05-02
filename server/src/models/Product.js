@@ -78,7 +78,7 @@ const productSchema = new mongoose.Schema(
 );
 
 // ── Pre-save: tạo slug + tính totalStock ─────────────────────────
-productSchema.pre('save', function (next) {
+productSchema.pre('save', function () {
   if (this.isModified('name')) {
     this.slug = this.name
       .toLowerCase()
@@ -88,7 +88,6 @@ productSchema.pre('save', function (next) {
       .trim();
   }
   this.totalStock = this.sizes.reduce((sum, s) => sum + s.stock, 0);
-  next();
 });
 
 // ── Virtual: % giảm giá ──────────────────────────────────────────

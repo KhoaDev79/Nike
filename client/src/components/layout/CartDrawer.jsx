@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useCartStore from '../store/useCartStore';
+import useCartStore from '../../store/useCartStore';
 
 export default function CartDrawer({ open, onClose }) {
   const navigate = useNavigate();

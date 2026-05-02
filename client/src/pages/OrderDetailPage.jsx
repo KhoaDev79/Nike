@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getOrderByIdAPI } from '../services/orderService';
+import { getOrderByIdAPI } from '../api/orderApi';
 import { motion } from 'framer-motion';
 
 const STATUS_MAP = {

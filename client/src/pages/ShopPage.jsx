@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import FilterSidebar from '../components/FilterSideBar';
-import { getProductsAPI } from '../services/productService';
+import FilterSidebar from '../components/FilterSidebar';
+import { getProductsAPI } from '../api/productApi';
 import heroImg from '../assets/hero_main.jpg';
 
 const DEFAULT_FILTERS = {

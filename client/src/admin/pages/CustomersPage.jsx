@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import useAuthStore from '../store/useAuthStore';
+import useAuthStore from '../../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
-import { getAdminStatsAPI, getCustomerInsightsAPI } from '../services/orderService';
-import { updateUserByAdminAPI, deleteUserByAdminAPI } from '../services/authService';
+import { getAdminStatsAPI, getCustomerInsightsAPI } from '../../api/orderApi';
+import { updateUserByAdminAPI, deleteUserByAdminAPI } from '../../api/authApi';
 import toast from 'react-hot-toast';
 import AdminSidebar from '../components/AdminSidebar';
 

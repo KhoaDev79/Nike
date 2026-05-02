@@ -1,10 +1,51 @@
 @import "tailwindcss";
 
-:root {
-  font-family: 'Inter', sans-serif;
+@theme {
+  --color-nike-black: #111111;
+  --color-nike-white: #FFFFFF;
+  --color-snow: #FAFAFA;
+  --color-light-gray: #F5F5F5;
+  --color-hover-gray: #E5E5E5;
+  --color-dark-surface: #28282A;
+  --color-deep-charcoal: #1F1F21;
+  --color-dark-hover: #39393B;
+
+  --color-text-primary: #111111;
+  --color-text-secondary: #707072;
+  --color-text-disabled: #9E9EA0;
+  --color-text-disabled-inverse: #4B4B4D;
+
+  --color-border-primary: #707072;
+  --color-border-secondary: #CACACB;
+  --color-border-active: #111111;
+
+  --color-nike-red: #D30005;
+  --color-bright-red: #EE0005;
+  --color-orange-badge: #D33918;
+  --color-orange-flash: #FF5000;
+  --color-success-green: #007D48;
+  --color-success-inverse: #1EAA52;
+  --color-link-blue: #1151FF;
+  --color-info-inverse: #1190FF;
+  --color-warning-yellow: #FEDF35;
+
+  --font-display: 'Oswald', 'Nike Futura ND', Impact, sans-serif;
+  --font-heading: 'Inter', 'Helvetica Now Display', Helvetica, Arial, sans-serif;
+  --font-body: 'Inter', 'Helvetica Now Text', Helvetica, Arial, sans-serif;
 }
 
 @layer base {
+  body {
+    background-color: var(--color-nike-white);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
   }
@@ -12,36 +53,19 @@
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #e4e4e7;
+    background: var(--color-border-secondary);
     border-radius: 10px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #27272a;
-  }
-
-  /* Custom scrollbar for dark-mode dropdowns */
-  .dropdown-scrollbar::-webkit-scrollbar {
-    width: 5px;
-  }
-  .dropdown-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .dropdown-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-  }
-  .dropdown-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.4);
+    background: var(--color-text-secondary);
   }
 }
 
 @layer utilities {
-  .nike-gradient {
-    background: linear-gradient(135deg, #000 0%, #333 100%);
-  }
-  .glass-card {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+  .text-display {
+    font-family: var(--font-display);
+    font-size: 96px;
+    line-height: 0.90;
+    text-transform: uppercase;
   }
 }

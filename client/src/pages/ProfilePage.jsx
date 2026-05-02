@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import useAuthStore from '../store/useAuthStore';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import api from '../services/api';
+import api from '../api/axiosClient';
 import toast from 'react-hot-toast';
 
 const API_PROVINCES = 'https://provinces.open-api.vn/api';

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import ProductCard from '../components/ProductCard';
-import { getMeAPI } from '../services/authService';
+import { getMeAPI } from '../api/authApi';
 
 export default function WishlistPage() {
   const { user, toggleWishlist, fetchMe } = useAuthStore();

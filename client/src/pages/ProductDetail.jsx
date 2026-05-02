@@ -8,7 +8,7 @@ import {
   getProductBySlugAPI,
   getRelatedProductsAPI,
   addReviewAPI,
-} from '../services/productService';
+} from '../api/productApi';
 import toast from 'react-hot-toast';
 
 export default function ProductDetail() {

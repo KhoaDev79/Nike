@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import useAuthStore from '../store/useAuthStore';
+import useAuthStore from '../../store/useAuthStore';
 
 export default function AdminSidebar({ stats }) {
   const navigate = useNavigate();

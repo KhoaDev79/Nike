@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useCartStore from '../store/useCartStore';
 import useAuthStore from '../store/useAuthStore';
-import { createOrderAPI } from '../services/orderService';
+import { createOrderAPI } from '../api/orderApi';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';

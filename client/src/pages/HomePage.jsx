@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import { getFeaturedProductsAPI } from '../services/productService';
+import { getFeaturedProductsAPI } from '../api/productApi';
 import ScrollReveal from '../components/ScrollReveal';
 import { motion, AnimatePresence } from 'framer-motion';
 

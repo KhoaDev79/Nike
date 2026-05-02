@@ -116,7 +116,43 @@ export const getRelatedProducts = asyncHandler(async (req, res) => {
 
 // @route  POST /api/products  — Private/Admin
 export const createProduct = asyncHandler(async (req, res) => {
-  const product = await Product.create(req.body);
+  const {
+    name, description, price, originalPrice, images,
+    category, tier, surfaceType, sizes,
+    color, colorHex, tags,
+    isActive, isFeatured,
+  } = req.body;
+
+  if (!name || !price || !description) {
+    res.status(400);
+    throw new Error('Vui lòng nhập tên, giá và mô tả sản phẩm.');
+  }
+  if (!images || images.length === 0) {
+    res.status(400);
+    throw new Error('Cần ít nhất 1 ảnh sản phẩm.');
+  }
+  if (!sizes || sizes.length === 0) {
+    res.status(400);
+    throw new Error('Cần ít nhất 1 size sản phẩm.');
+  }
+
+  const product = await Product.create({
+    name,
+    description,
+    price: Number(price),
+    originalPrice: originalPrice ? Number(originalPrice) : undefined,
+    images,
+    category: category || 'Other',
+    tier: tier || 'Academy',
+    surfaceType: surfaceType || 'TF',
+    sizes: sizes.map(s => ({ size: Number(s.size), stock: Number(s.stock || 0) })),
+    color: color || '',
+    colorHex: colorHex || '#000000',
+    tags: tags || [],
+    isActive: isActive ?? true,
+    isFeatured: isFeatured ?? false,
+  });
+
   res.status(201).json({ success: true, data: product });
 });
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api from '../api/axiosClient';
 import { toast } from 'react-hot-toast';
 import useAuthStore from '../store/useAuthStore';
 import { motion, AnimatePresence } from 'framer-motion';

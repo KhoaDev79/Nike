@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import useAuthStore from '../store/useAuthStore';
+import useAuthStore from '../../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
-import { getProductsAPI, deleteProductAPI } from '../services/productService';
-import { getAdminStatsAPI } from '../services/orderService';
+import { getProductsAPI, deleteProductAPI, createProductAPI, updateProductAPI } from '../../api/productApi';
+import { getAdminStatsAPI } from '../../api/orderApi';
 import toast from 'react-hot-toast';
 import AdminSidebar from '../components/AdminSidebar';
+import ProductFormModal from '../components/ProductFormModal';
 
 const glass = { background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14 };
 const muted = 'rgba(255,255,255,0.35)';
@@ -150,18 +151,11 @@ export default function AdminProductsPage() {
       </main>
 
       {showModal && (
-        <div className='fixed inset-0 z-[100] flex items-center justify-center p-4' style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
-          <div className='w-full max-w-md rounded-2xl p-8 text-center' style={{ background: 'rgba(15,20,35,0.95)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <button onClick={() => setShowModal(false)} className='absolute top-6 right-6 w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer' style={{ background: 'rgba(255,255,255,0.05)' }}>
-              <svg className='w-4 h-4' fill='none' stroke='rgba(255,255,255,0.5)' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12'/></svg>
-            </button>
-            <div className='w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center text-[28px]' style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.3), rgba(13,148,136,0.2))' }}>⚙️</div>
-            <h2 className='text-[16px] font-bold text-white mb-2'>{editingProduct ? 'Chỉnh sửa' : 'Thêm sản phẩm'}</h2>
-            <p className='text-[12px] mb-6' style={{ color: muted }}>Tính năng đang được phát triển.</p>
-            <button onClick={() => setShowModal(false)} className='w-full py-3 rounded-xl text-[11px] font-semibold text-white cursor-pointer'
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #0d9488)' }}>Đóng</button>
-          </div>
-        </div>
+        <ProductFormModal
+          product={editingProduct}
+          onClose={() => { setShowModal(false); setEditingProduct(null); }}
+          onSaved={fetchProducts}
+        />
       )}
     </div>
   );

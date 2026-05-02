@@ -1,8 +1,11 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
-import Header from './components/Header';
-import Footer from './components/Footer';
+// ── Layout Components ───────────────────────────────────
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+
+// ── Public Pages ────────────────────────────────────────
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
 import ProductDetail from './pages/ProductDetail';
@@ -14,11 +17,13 @@ import WishlistPage from './pages/WishlistPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import OrdersPage from './pages/OrdersPage';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminOrdersPage from './pages/AdminOrdersPage';
-import AdminProductsPage from './pages/AdminProductsPage';
-import AdminCustomersPage from './pages/AdminCustomersPage';
-import AdminReportsPage from './pages/AdminReportsPage';
+
+// ── Admin Pages ─────────────────────────────────────────
+import AdminDashboard from './admin/pages/DashboardPage';
+import AdminOrdersPage from './admin/pages/OrdersPage';
+import AdminProductsPage from './admin/pages/ProductsPage';
+import AdminCustomersPage from './admin/pages/CustomersPage';
+import AdminReportsPage from './admin/pages/ReportsPage';
 
 function Layout() {
   const location = useLocation();
@@ -29,6 +34,7 @@ function Layout() {
       {!isAdmin && <Header />}
       <main>
         <Routes>
+          {/* Public Routes */}
           <Route path='/' element={<HomePage />} />
           <Route path='/shop' element={<ShopPage />} />
           <Route path='/product/:slug' element={<ProductDetail />} />
@@ -40,6 +46,8 @@ function Layout() {
           <Route path='/account' element={<ProfilePage />} />
           <Route path='/orders' element={<OrdersPage />} />
           <Route path='/orders/:id' element={<OrderDetailPage />} />
+
+          {/* Admin Routes */}
           <Route path='/admin/dashboard' element={<AdminDashboard />} />
           <Route path='/admin/orders' element={<AdminOrdersPage />} />
           <Route path='/admin/products' element={<AdminProductsPage />} />
